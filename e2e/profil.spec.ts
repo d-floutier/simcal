@@ -24,7 +24,7 @@ test("la première configuration est obligatoire, puis le Journal affiche l'obje
   await expect(page).toHaveURL("/");
   const objectif = page.getByRole("region", { name: "Objectif du jour" });
   await expect(objectif).toContainText(/2\s?209\s?kcal/);
-  await expect(objectif).toContainText(/Protéines\s*110\s?g/);
+  await expect(objectif).toContainText(/Protéines\s*0\s?g\s*\/\s*110\s?g/);
 
   // Dans les réglages : une Répartition qui ne fait pas 100 % est signalée, le plancher expliqué.
   await page.getByRole("link", { name: "Réglages" }).click();

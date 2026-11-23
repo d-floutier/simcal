@@ -1,6 +1,6 @@
 // Tous les textes de l'interface, en français, regroupés ici pour une traduction future.
 import type { NiveauActivite, Repas, Rythme, SensObjectif, Sexe } from "@/core";
-import type { ChampProfil } from "@/services";
+import type { ChampEntree, ChampProfil } from "@/services";
 
 export const textes = {
   app: {
@@ -51,6 +51,75 @@ export const textes = {
     aujourdhui: "Aujourd'hui",
     repasVide: "Rien de noté pour l'instant.",
     objectifDuJour: "Objectif du jour",
+    jourPrecedent: "Jour précédent",
+    jourSuivant: "Jour suivant",
+    retourAujourdhui: "Revenir à aujourd'hui",
+    consomme: "Consommé",
+    objectif: "Objectif",
+    reste: "Reste",
+    depassement: "Dépassement",
+    ajouter: "Ajouter",
+    ajouterA: {
+      "petit-dejeuner": "Ajouter au petit-déjeuner",
+      dejeuner: "Ajouter au déjeuner",
+      diner: "Ajouter au dîner",
+      collations: "Ajouter aux collations",
+    } satisfies Record<Repas, string>,
+    totalRepas: (repas: string) => `Total ${repas.toLowerCase()}`,
+    sansObjectif: "Remplissez votre profil pour voir votre objectif.",
+  },
+  recherche: {
+    titre: "Ajouter un aliment",
+    pour: (repas: string, jour: string) => `${repas} · ${jour}`,
+    champ: "Rechercher un aliment",
+    placeholder: "Ex. : pomme, riz blanc cuit, crème…",
+    aucunResultat: "Aucun aliment trouvé.",
+    resultats: "Résultats",
+    kcalPour100: (kcal: string, unite: "g" | "ml") => `${kcal} pour 100 ${unite}`,
+  },
+  aliment: {
+    pour100: (unite: "g" | "ml") => `Valeurs pour 100 ${unite}`,
+    introuvable: "Cet aliment n'existe pas ou n'est plus disponible.",
+    energie: "Énergie",
+  },
+  nutriments: {
+    kcal: "Énergie",
+    proteines: "Protéines",
+    glucides: "Glucides",
+    lipides: "Lipides",
+    fibres: "Fibres",
+    sucres: "dont sucres",
+    satures: "dont acides gras saturés",
+    sel: "Sel",
+  },
+  entree: {
+    sectionAjout: "Noter cet aliment",
+    sectionModification: "Modifier l'entrée",
+    quantite: "Quantité",
+    unite: "Unité",
+    unites: { g: "g", ml: "ml" },
+    aideMillilitres: "1 ml compte pour 1 g.",
+    repas: "Repas",
+    apercu: "Pour cette quantité",
+    ajouter: "Ajouter au Journal",
+    enregistrer: "Enregistrer",
+    enCours: "Enregistrement…",
+    supprimer: "Supprimer l'entrée",
+    suppressionEnCours: "Suppression…",
+    introuvable: "Cette entrée n'existe pas.",
+    alimentSupprime: "L'aliment d'origine n'existe plus : l'entrée garde ses valeurs.",
+    jourFutur: "Impossible de noter sur un jour futur.",
+    erreurs: {
+      jour: "Ce jour n'est pas valide.",
+      repas: "Choisissez un repas.",
+      aliment: "Cet aliment n'est plus disponible.",
+      quantite: "Indiquez une quantité supérieure à 0.",
+    } satisfies Record<ChampEntree, string>,
+  },
+  sources: {
+    ciqual:
+      "Aliments génériques : Table de composition nutritionnelle des aliments Ciqual 2025, Anses (Licence Ouverte 2.0).",
+    ciqualUrl: "https://doi.org/10.57745/RDMHWY",
   },
   configuration: {
     titre: "Bienvenue sur Simcal",
@@ -155,4 +224,21 @@ export function formaterKcal(kcal: number): string {
 
 export function formaterGrammes(g: number): string {
   return `${formaterNombre(Math.round(g))} g`;
+}
+
+/** Une valeur de nutriment en g : deux décimales sous 1 g, une au-delà. Null : « — » (inconnu). */
+export function formaterNutriment(g: number | null): string {
+  if (g === null) return "—";
+  return `${formaterNombre(g, Math.abs(g) < 1 ? 2 : 1)} g`;
+}
+
+export function formaterQuantite(valeur: number, unite: string): string {
+  return `${formaterNombre(valeur, 1)} ${unite}`;
+}
+
+export function formaterJourCourt(jour: string): string {
+  const [a, m, j] = jour.split("-").map(Number);
+  return new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", timeZone: "UTC" }).format(
+    new Date(Date.UTC(a, m - 1, j)),
+  );
 }

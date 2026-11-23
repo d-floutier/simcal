@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "pnpm db:migrate && next dev",
+    "dev": "pnpm db:migrate && pnpm db:import-ciqual && next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -11,7 +11,8 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "tsx --env-file-if-exists=.env.local scripts/migrate.ts"
+    "db:migrate": "tsx --env-file-if-exists=.env.local scripts/migrate.ts",
+    "db:import-ciqual": "tsx --env-file-if-exists=.env.local scripts/import-ciqual.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",

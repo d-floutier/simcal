@@ -1,5 +1,5 @@
 // Noyau nutritionnel : module pur, sans base de données ni framework.
-export { jourCalendaire, type Jour } from "./jour";
+export { estJourValide, jourCalendaire, jourDecale, type Jour } from "./jour";
 export { REPAS, type Repas } from "./repas";
 export {
   age,
@@ -24,3 +24,16 @@ export {
   type SensObjectif,
   type Sexe,
 } from "./objectif";
+export {
+  NUTRIMENTS_FACULTATIFS,
+  quantiteEnGrammes,
+  resteDuJour,
+  totauxDuJour,
+  valeursEntree,
+  type Macros,
+  type NutrimentsFacultatifs,
+  type Quantite,
+  type TotauxDuJour,
+  type ValeursNutritionnelles,
+} from "./entree";
+export { normaliserRecherche } from "./recherche";

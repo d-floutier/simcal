@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { jourCalendaire } from "@/core";
+import { jourCalendaire, jourDecale } from "@/core";
 
 describe("jourCalendaire", () => {
   it("donne la date de calendrier locale dans le fuseau de l'utilisateur", () => {
@@ -15,5 +15,13 @@ describe("jourCalendaire", () => {
 
   it("suit un fuseau à l'ouest de UTC", () => {
     expect(jourCalendaire(new Date("2026-01-11T03:00:00Z"), "America/New_York")).toBe("2026-01-10");
+  });
+});
+
+describe("jourDecale", () => {
+  it("passe au jour précédent ou suivant, à travers les mois et les années", () => {
+    expect(jourDecale("2026-03-01", -1)).toBe("2026-02-28");
+    expect(jourDecale("2026-12-31", 1)).toBe("2027-01-01");
+    expect(jourDecale("2028-02-28", 1)).toBe("2028-02-29");
   });
 });

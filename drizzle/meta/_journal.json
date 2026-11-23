@@ -15,6 +15,13 @@
       "when": 1795457486193,
       "tag": "0001_profil",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795458205107,
+      "tag": "0002_journal",
+      "breakpoints": true
     }
   ]
 }

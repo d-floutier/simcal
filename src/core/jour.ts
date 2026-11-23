@@ -11,3 +11,16 @@ export function jourCalendaire(instant: Date, fuseau: string): Jour {
     day: "2-digit",
   }).format(instant);
 }
+
+/** Le jour situé `n` jours après (ou avant, si `n` est négatif) le jour donné. */
+export function jourDecale(jour: Jour, n: number): Jour {
+  const [a, m, j] = jour.split("-").map(Number);
+  return new Date(Date.UTC(a, m - 1, j + n)).toISOString().slice(0, 10);
+}
+
+/** Vrai pour une date de calendrier réelle au format AAAA-MM-JJ. */
+export function estJourValide(jour: string): jour is Jour {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(jour)) return false;
+  const d = new Date(`${jour}T00:00:00Z`);
+  return !Number.isNaN(d.getTime()) && d.toISOString().startsWith(jour);
+}

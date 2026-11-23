@@ -9,6 +9,8 @@ const E2E_ALLOWED_EMAILS = [
   "profil-mobile-chrome@exemple.fr",
   "profil-mobile-safari@exemple.fr",
   "pwa-mobile-chrome@exemple.fr",
+  "journal-mobile-chrome@exemple.fr",
+  "journal-mobile-safari@exemple.fr",
 ];
 
 // Runs a production build against a fresh local PGlite folder, migrated with the
@@ -26,7 +28,7 @@ export default defineConfig({
     { name: "mobile-safari", use: { ...devices["iPhone 15"] } },
   ],
   webServer: {
-    command: `rm -rf .pglite-e2e && pnpm build && pnpm db:migrate && pnpm exec next start -p ${PORT}`,
+    command: `rm -rf .pglite-e2e && pnpm build && pnpm db:migrate && pnpm db:import-ciqual && pnpm exec next start -p ${PORT}`,
     url: `${baseURL}/connexion`,
     reuseExistingServer: false,
     timeout: 240_000,

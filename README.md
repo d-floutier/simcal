@@ -9,7 +9,7 @@ Stack : Next.js 16 (App Router, TypeScript), Tailwind 4 + shadcn/ui (Base UI), P
 ```sh
 pnpm install
 cp .env.example .env.local   # puis renseigner BETTER_AUTH_SECRET et SIMCAL_ALLOWED_EMAILS
-pnpm dev                     # applique les migrations puis lance http://localhost:3000
+pnpm dev                     # applique les migrations, importe CIQUAL puis lance http://localhost:3000
 ```
 
 Sans `DATABASE_URL`, la base est un dossier PGlite local (`./.pglite`, ignoré par git). PGlite n'accepte qu'un processus à la fois : arrêtez `pnpm dev` avant de lancer `pnpm db:migrate` à part.
@@ -31,6 +31,14 @@ Sans `DATABASE_URL`, la base est un dossier PGlite local (`./.pglite`, ignoré p
 - `pnpm db:migrate` applique les migrations à Neon si `DATABASE_URL` est défini, sinon au dossier PGlite.
 - Les mêmes migrations servent en production, en local et dans les tests.
 
+## Aliments génériques (CIQUAL)
+
+- Source : Table de composition nutritionnelle des aliments Ciqual 2025, Anses, sous Licence Ouverte 2.0 (Etalab), https://doi.org/10.57745/RDMHWY. Le crédit est affiché dans l'app (recherche et fiche d'un Aliment générique).
+- `data/ciqual-2025.csv` est un extrait compact, versionné, de la table officielle : code CIQUAL, nom, kcal, protéines (N × facteur de Jones), glucides, lipides, sucres, fibres, acides gras saturés et sel, pour 100 g. Conventions : « - » devient vide (inconnu), « traces » et « < x » deviennent 0. Les aliments sans kcal ou sans l'une des trois Macros sont écartés.
+- `pnpm db:import-ciqual` importe ce fichier dans Neon (`DATABASE_URL`) ou dans PGlite. L'import est répétable : chaque Aliment est identifié par son code CIQUAL et mis à jour sur place, ce qui garde les liens des Entrées. `pnpm dev` et les tests Playwright le lancent après les migrations.
+- Pour régénérer l'extrait (nouvelle version de CIQUAL) : télécharger `Table Ciqual 2025_FR_2025_11_03.xlsx` depuis https://entrepot.recherche.data.gouv.fr/api/access/datafile/666260, exporter sa première feuille en CSV UTF-8 séparé par des virgules (`soffice --headless --convert-to csv …`), puis `pnpm exec tsx scripts/ciqual/deriver.ts <table.csv> data/ciqual-2025.csv`.
+- La recherche se fait en plein texte français (`to_tsvector('french', …)`, index GIN) sur le nom sans accents ni casse (`normaliserRecherche` du noyau), chaque mot pris comme début de mot.
+
 ## Tests
 
 | Commande | Seam |
@@ -44,7 +52,7 @@ Première fois : `pnpm exec playwright install chromium webkit`.
 ## Déployer sur Vercel (étape manuelle)
 
 1. Créer une base Neon et récupérer sa chaîne de connexion pooled.
-2. Appliquer les migrations : `DATABASE_URL=… pnpm db:migrate`.
+2. Appliquer les migrations puis importer CIQUAL : `DATABASE_URL=… pnpm db:migrate && DATABASE_URL=… pnpm db:import-ciqual`.
 3. Importer le repo dans Vercel (framework Next.js, `pnpm`), et définir `DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` et `SIMCAL_ALLOWED_EMAILS`.
 4. Pour les déploiements suivants, relancer `pnpm db:migrate` contre Neon avant chaque déploiement qui ajoute une migration (ou définir la commande de build Vercel à `pnpm db:migrate && pnpm build`).
 
@@ -53,6 +61,7 @@ Sur Vercel, sans `DATABASE_URL`, l'app refuse d'ouvrir une base (pas de repli su
 ## Organisation du code
 
 - `src/core` : le noyau nutritionnel, pur (ni base de données ni framework).
+- `src/sources` : les sources d'Aliments (interface `SourceAliments` : chercher par texte, trouver par Code-barres). CIQUAL (`sourceCiqual`, `importerAlimentsGeneriques`) en est la première.
 - `src/services` : les services de l'application. Chaque fonction reçoit un `Contexte` `{ db, userId }` et ne lit ou n'écrit que les données de cet utilisateur.
 - `src/lib/auth` : Better Auth (`createAuth` pour les tests, `getAuth`/`requireUser` pour l'app).
 - `src/lib/profil.ts` : `requireProfil()`, à appeler dans chaque page qui dépend du Profil : tant qu'il n'est pas complet, elle redirige vers la première configuration (`/configuration`).
