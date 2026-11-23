@@ -1,6 +1,7 @@
 "use server";
 
 import { refresh } from "next/cache";
+import { nombreDuFormulaire } from "@/lib/nombre-saisi";
 import { requireContexte } from "@/lib/profil";
 import {
   DernierePesee,
@@ -17,11 +18,10 @@ export type EtatPesee = { erreurs?: ChampPesee[]; erreur?: string; enregistree?:
 
 export async function enregistrerPeseeAction(_: EtatPesee, formData: FormData): Promise<EtatPesee> {
   const ctx = await requireContexte();
-  const brut = String(formData.get("poidsKg") ?? "").trim().replace(",", ".");
   try {
     await enregistrerPesee(ctx, {
       jour: String(formData.get("jour") ?? ""),
-      poidsKg: brut === "" ? Number.NaN : Number(brut),
+      poidsKg: nombreDuFormulaire(formData, "poidsKg"),
     });
   } catch (e) {
     if (e instanceof SaisiePeseeInvalide) return { erreurs: e.champs };

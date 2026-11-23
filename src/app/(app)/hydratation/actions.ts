@@ -1,6 +1,7 @@
 "use server";
 
 import { refresh } from "next/cache";
+import { nombreDuFormulaire } from "@/lib/nombre-saisi";
 import { requireContexte } from "@/lib/profil";
 import {
   ajouterVerre,
@@ -41,11 +42,6 @@ export async function retirerVerreAction(_: EtatVerre, formData: FormData): Prom
 
 export type EtatReglagesHydratation = { erreurs?: ChampHydratation[]; erreur?: string; enregistre?: boolean };
 
-const lireMl = (v: FormDataEntryValue | null) => {
-  const brut = String(v ?? "").trim().replace(",", ".");
-  return brut === "" ? Number.NaN : Number(brut);
-};
-
 export async function modifierReglagesHydratationAction(
   _: EtatReglagesHydratation,
   formData: FormData,
@@ -53,8 +49,8 @@ export async function modifierReglagesHydratationAction(
   const ctx = await requireContexte();
   try {
     await modifierReglagesHydratation(ctx, {
-      objectifMl: lireMl(formData.get("objectifMl")),
-      verreMl: lireMl(formData.get("verreMl")),
+      objectifMl: nombreDuFormulaire(formData, "objectifMl"),
+      verreMl: nombreDuFormulaire(formData, "verreMl"),
     });
   } catch (e) {
     if (e instanceof SaisieHydratationInvalide) return { erreurs: e.champs };

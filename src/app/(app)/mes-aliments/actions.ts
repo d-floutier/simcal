@@ -3,6 +3,7 @@
 import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
 import { NUTRIMENTS_FACULTATIFS } from "@/core";
+import { nombreDuFormulaire as nombre } from "@/lib/nombre-saisi";
 import { requireContexte } from "@/lib/profil";
 import {
   AlimentIntrouvable,
@@ -23,12 +24,6 @@ import { textes } from "@/ui/textes";
 
 export type EtatAliment = { erreurs?: ChampAlimentPersonnalise[]; erreur?: string; enregistre?: boolean };
 export type EtatPortion = { erreurs?: ChampPortion[]; erreur?: string; enregistree?: boolean };
-
-/** Un nombre saisi (virgule acceptée) : NaN s'il manque, pour qu'un champ obligatoire soit refusé. */
-function nombre(formData: FormData, champ: string): number {
-  const brut = String(formData.get(champ) ?? "").trim().replace(",", ".");
-  return brut === "" ? Number.NaN : Number(brut);
-}
 
 /** Un nutriment facultatif : null quand il est laissé vide. */
 function facultatif(formData: FormData, champ: string): number | null {

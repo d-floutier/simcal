@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import type { Repas } from "@/core";
+import { nombreDuFormulaire } from "@/lib/nombre-saisi";
 import { requireContexte } from "@/lib/profil";
 import {
   ajouterEntree,
@@ -20,8 +21,7 @@ export type EtatEntree = { erreurs?: ChampEntree[]; erreur?: string };
 
 /** La quantité du formulaire : l'unité vaut « g », « ml » ou « portion:<id de la Portion> ». */
 function lireQuantite(formData: FormData): QuantiteSaisie {
-  const brut = String(formData.get("quantite") ?? "").trim().replace(",", ".");
-  const nombre = brut === "" ? Number.NaN : Number(brut);
+  const nombre = nombreDuFormulaire(formData, "quantite");
   const unite = String(formData.get("unite") ?? "g");
   if (unite.startsWith("portion:")) return { unite: "portion", portionId: unite.slice("portion:".length), nombre };
   return { unite: unite as "g" | "ml", valeur: nombre };

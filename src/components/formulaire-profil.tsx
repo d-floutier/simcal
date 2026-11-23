@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlerteHorsLigne, useGardeHorsLigne } from "@/components/hors-ligne";
 import { ResumeObjectif } from "@/components/resume-objectif";
+import { lireNombreSaisi as nombre } from "@/lib/nombre-saisi";
 import { textes } from "@/ui/textes";
 
 const t = textes.profil;
@@ -56,8 +57,6 @@ function valeursInitiales(profil: SaisieProfil | null, fuseauParDefaut: string):
     lipides: String(r.lipides),
   };
 }
-
-const nombre = (s: string) => (s.trim() === "" ? Number.NaN : Number(s.replace(",", ".")));
 
 /** Les paramètres tant qu'ils sont complets, pour l'aperçu en direct ; null sinon. */
 function parametres(v: Valeurs): ParametresObjectif | null {

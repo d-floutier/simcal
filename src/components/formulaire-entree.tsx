@@ -16,6 +16,7 @@ import {
   type EtatEntree,
 } from "@/app/(app)/actions-journal";
 import { AlerteHorsLigne, useGardeHorsLigne } from "@/components/hors-ligne";
+import { lireNombreSaisi as lireNombre } from "@/lib/nombre-saisi";
 import { TableauNutriments } from "@/components/tableau-nutriments";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,7 +37,6 @@ type Props = {
   portions?: Portion[];
 } & ({ mode: "ajout"; alimentId: string; jour: string } | { mode: "modification"; entreeId: string });
 
-const lireNombre = (s: string) => (s.trim() === "" ? Number.NaN : Number(s.replace(",", ".")));
 const afficherNombre = (n: number) => String(n).replace(".", ",");
 /** La valeur du choix d'unité pour une Portion (lue par l'action). */
 const valeurPortion = (id: string) => `portion:${id}`;
