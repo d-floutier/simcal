@@ -83,6 +83,20 @@ describe("Récents", () => {
     expect(new Set(recents.map((r) => r.aliment.id)).size).toBe(20);
   });
 
+  it("filtrés par un texte, ne cherchent que parmi les 20 Récents", async () => {
+    await noter("pomme crue", { unite: "g", valeur: 150 }, "2026-11-20");
+    const autres = Array.from({ length: 20 }, (_, i) => ({ ...ALIMENTS_TEST[4], code: `R${i}`, nom: `Céréale numéro ${i + 1}` }));
+    await importerAlimentsGeneriques(ctx.db, autres);
+    for (const { nom } of autres) {
+      const [a] = (await chercherAliments(ctx, nom)).filter((r) => r.nom === nom);
+      await ajouterEntree(ctx, { jour: "2026-11-22", repas: "diner", alimentId: a.id, quantite: { unite: "g", valeur: 80 } }, INSTANT);
+    }
+
+    // La pomme est le 21e Aliment le plus récemment noté : elle n'est plus un Récent.
+    expect(await lireRecents(ctx, "pomme")).toEqual([]);
+    expect(await lireRecents(ctx, "céréale")).toHaveLength(20);
+  });
+
   it("remontent en tête un Aliment noté de nouveau, avec sa nouvelle quantité", async () => {
     await noter("pomme crue", { unite: "g", valeur: 150 });
     await noter("riz blanc cuit");
