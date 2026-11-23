@@ -56,3 +56,9 @@ export {
   type HydratationDuJour,
   type ReglagesHydratation,
 } from "./hydratation";
+export {
+  statistiques,
+  type JourStatistiques,
+  type PeriodeStatistiques,
+  type Statistiques,
+} from "./statistiques";

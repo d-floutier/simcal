@@ -46,6 +46,7 @@ export const textes = {
     journal: "Journal",
     reglages: "Réglages",
     pesees: "Pesées",
+    statistiques: "Stats",
   },
   journal: {
     titre: "Journal",
@@ -250,6 +251,39 @@ export const textes = {
       objectifMl: "Indiquez un nombre entier de ml entre 250 et 10 000.",
       verreMl: "Indiquez un nombre entier de ml entre 10 et 2 000.",
     } satisfies Record<ChampHydratation, string>,
+  },
+  statistiques: {
+    titre: "Statistiques",
+    periodes: "Période",
+    periode: (jours: number) => `${jours} jours`,
+    intervalle: (du: string, au: string) => `Du ${du} au ${au}`,
+    kcalTitre: "Kcal par jour",
+    kcalIntro: "Un jour sans Entrée reste vide : il ne compte pas comme un jour à 0 kcal.",
+    consomme: "Consommé",
+    objectif: "Objectif calorique",
+    sansEntree: "sans Entrée",
+    sansObjectif: "pas d'objectif",
+    resumeKcal: (avec: number, total: number) => `Kcal consommées sur ${avec} jours avec Entrée, sur ${total} jours.`,
+    infobulleJour: (jour: string, kcal: string, objectif: string) => `${jour} : ${kcal} (objectif ${objectif})`,
+    macrosTitre: "Moyenne des Macros",
+    macrosIntro: (jours: number) =>
+      jours === 0
+        ? "Aucun jour avec Entrée sur la période."
+        : `Moyenne sur ${jours} jour${jours > 1 ? "s" : ""} avec Entrée, comparée à vos cibles d'aujourd'hui.`,
+    moyenne: "Moyenne",
+    cible: "Cible",
+    kcal: "Kcal",
+    glucides: "Glucides",
+    proteines: "Protéines",
+    lipides: "Lipides",
+    poidsTitre: "Poids",
+    pesee: "Pesée",
+    poidsCible: "Poids cible",
+    aucunePesee: "Aucune Pesée sur la période.",
+    resumePoids: (n: number, premier: string, dernier: string) =>
+      `${n} Pesée${n > 1 ? "s" : ""} sur la période, de ${premier} à ${dernier}.`,
+    voirTableau: "Voir les valeurs",
+    jour: "Jour",
   },
   horsLigne: {
     indicateur: "Hors ligne",

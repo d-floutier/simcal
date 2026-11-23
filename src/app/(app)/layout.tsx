@@ -15,6 +15,9 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
             <Link href="/pesees" className={buttonVariants({ variant: "ghost", size: "sm" })}>
               {textes.navigation.pesees}
             </Link>
+            <Link href="/statistiques" className={buttonVariants({ variant: "ghost", size: "sm" })}>
+              {textes.navigation.statistiques}
+            </Link>
             <form action={seDeconnecter}>
               <Button type="submit" variant="ghost" size="sm">
                 {textes.navigation.deconnexion}
