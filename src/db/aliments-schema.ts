@@ -10,8 +10,7 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-import type { Repas, UniteAliment } from "@/core";
-import type { ProduitOff } from "@/sources/open-food-facts";
+import type { Repas, UniteAliment, ValeursNutritionnelles } from "@/core";
 import { user } from "./auth-schema";
 
 export type TypeAliment = "generique" | "produit" | "personnalise";
@@ -113,6 +112,21 @@ export const entree = pgTable(
   },
   (t) => [index("entree_user_jour_idx").on(t.userId, t.jour)],
 );
+
+/**
+ * Un Produit tel que lu chez Open Food Facts, ramené à ses valeurs pour 100 g (ou 100 ml) :
+ * le format gardé dans le cache des recherches.
+ */
+export type ProduitOff = {
+  /** Le Code-barres. */
+  code: string;
+  nom: string;
+  marque: string | null;
+  unite: UniteAliment;
+  valeurs: ValeursNutritionnelles;
+  /** Les Portions fournies par Open Food Facts (sa « portion » de référence). */
+  portions: { nom: string; grammes: number }[];
+};
 
 /**
  * Le cache des recherches Open Food Facts, partagé par tous les utilisateurs : sur Vercel, toutes

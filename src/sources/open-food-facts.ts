@@ -1,17 +1,7 @@
-import { kcalDepuisKj, normaliserRecherche, type ValeursNutritionnelles } from "@/core";
-import type { UniteAliment } from "@/db/schema";
+import { kcalDepuisKj, normaliserRecherche } from "@/core";
+import type { ProduitOff, UniteAliment } from "@/db/schema";
 
-/** Un Produit tel que lu chez Open Food Facts, ramené à ses valeurs pour 100 g (ou 100 ml). */
-export type ProduitOff = {
-  /** Le Code-barres. */
-  code: string;
-  nom: string;
-  marque: string | null;
-  unite: UniteAliment;
-  valeurs: ValeursNutritionnelles;
-  /** Les Portions fournies par Open Food Facts (sa « portion » de référence). */
-  portions: { nom: string; grammes: number }[];
-};
+export type { ProduitOff };
 
 /**
  * Ce que Simcal demande à Open Food Facts : chercher par texte, lire un produit par Code-barres.
