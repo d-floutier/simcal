@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, sql, type SQL } from "drizzle-orm";
 import { normaliserRecherche, type ValeursNutritionnelles } from "@/core";
 import type { Db } from "@/db/client";
 import { aliment } from "@/db/schema";
@@ -70,35 +70,40 @@ export function requetePleinTexte(texte: string): string | null {
 
 export const LIMITE_RESULTATS = 30;
 
+/**
+ * Cherche en plein texte parmi les Aliments gardés en base qui vérifient `filtre` : d'abord les
+ * noms qui commencent par la recherche, puis par pertinence, puis les noms les plus courts.
+ */
+export async function chercherEnBase(db: Db, texte: string, filtre: SQL | undefined): Promise<AlimentResume[]> {
+  const requete = requetePleinTexte(texte);
+  if (!requete) return [];
+  const tsquery = sql`to_tsquery('french', ${requete})`;
+  const vecteur = sql`to_tsvector('french', ${aliment.nomRecherche})`;
+  const debut = normaliserRecherche(texte);
+  return db
+    .select({
+      id: aliment.id,
+      type: aliment.type,
+      nom: aliment.nom,
+      marque: aliment.marque,
+      kcal: aliment.kcal,
+      unite: aliment.unite,
+    })
+    .from(aliment)
+    .where(and(filtre, sql`${vecteur} @@ ${tsquery}`))
+    .orderBy(
+      desc(sql`${aliment.nomRecherche} like ${debut + "%"}`),
+      desc(sql`ts_rank(${vecteur}, ${tsquery})`),
+      sql`length(${aliment.nom})`,
+      aliment.nom,
+    )
+    .limit(LIMITE_RESULTATS);
+}
+
 /** La source CIQUAL : les Aliments génériques importés dans la base. */
 export function sourceCiqual(db: Db): SourceAliments {
   return {
-    async chercher(texte) {
-      const requete = requetePleinTexte(texte);
-      if (!requete) return [];
-      const tsquery = sql`to_tsquery('french', ${requete})`;
-      const vecteur = sql`to_tsvector('french', ${aliment.nomRecherche})`;
-      const debut = normaliserRecherche(texte);
-      const lignes: AlimentResume[] = await db
-        .select({
-          id: aliment.id,
-          type: aliment.type,
-          nom: aliment.nom,
-          marque: aliment.marque,
-          kcal: aliment.kcal,
-          unite: aliment.unite,
-        })
-        .from(aliment)
-        .where(and(eq(aliment.type, "generique"), sql`${vecteur} @@ ${tsquery}`))
-        .orderBy(
-          desc(sql`${aliment.nomRecherche} like ${debut + "%"}`),
-          desc(sql`ts_rank(${vecteur}, ${tsquery})`),
-          sql`length(${aliment.nom})`,
-          aliment.nom,
-        )
-        .limit(LIMITE_RESULTATS);
-      return lignes;
-    },
+    chercher: (texte) => chercherEnBase(db, texte, eq(aliment.type, "generique")),
     // Les Aliments génériques n'ont pas de Code-barres.
     async trouverParCodeBarres() {
       return null;

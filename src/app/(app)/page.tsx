@@ -7,7 +7,7 @@ import { jourDecale } from "@/core";
 import { jourDemande } from "@/lib/jour-demande";
 import { requireProfil } from "@/lib/profil";
 import { lireJournal } from "@/services";
-import { formaterJourLong, formaterKcal, formaterQuantite, textes } from "@/ui/textes";
+import { formaterJourLong, formaterKcal, formaterQuantiteEntree, textes } from "@/ui/textes";
 
 const t = textes.journal;
 
@@ -85,7 +85,7 @@ export default async function JournalPage(props: PageProps<"/">) {
                       <span className="min-w-0">
                         <span className="block truncate">{e.nom}</span>
                         <span className="text-xs text-muted-foreground">
-                          {formaterQuantite(e.quantite.valeur, e.quantite.unite)}
+                          {formaterQuantiteEntree(e.quantite, e.grammes)}
                         </span>
                       </span>
                       <span className="shrink-0 tabular-nums">{formaterKcal(e.valeurs.kcal)}</span>

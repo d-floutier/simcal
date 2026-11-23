@@ -62,7 +62,9 @@ describe("fiche d'un Aliment", () => {
       nom: "Crème 30% MG, épaisse, rayon frais",
       marque: null,
       unite: "g",
+      codeBarres: null,
       valeurs: { kcal: 285, proteines: 2.32, glucides: 1.38, lipides: 29.9, sucres: 1.38, fibres: 0, satures: 19.5, sel: 0.065 },
+      portions: [],
     });
   });
 

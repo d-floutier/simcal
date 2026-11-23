@@ -18,12 +18,13 @@ import { textes } from "@/ui/textes";
 
 export type EtatEntree = { erreurs?: ChampEntree[]; erreur?: string };
 
+/** La quantité du formulaire : l'unité vaut « g », « ml » ou « portion:<id de la Portion> ». */
 function lireQuantite(formData: FormData): QuantiteSaisie {
   const brut = String(formData.get("quantite") ?? "").trim().replace(",", ".");
-  return {
-    unite: String(formData.get("unite") ?? "g") as QuantiteSaisie["unite"],
-    valeur: brut === "" ? Number.NaN : Number(brut),
-  };
+  const nombre = brut === "" ? Number.NaN : Number(brut);
+  const unite = String(formData.get("unite") ?? "g");
+  if (unite.startsWith("portion:")) return { unite: "portion", portionId: unite.slice("portion:".length), nombre };
+  return { unite: unite as "g" | "ml", valeur: nombre };
 }
 
 function erreurEntree(e: unknown): EtatEntree {

@@ -1,6 +1,13 @@
 // Tous les textes de l'interface, en français, regroupés ici pour une traduction future.
 import type { NiveauActivite, Repas, Rythme, SensObjectif, Sexe } from "@/core";
-import type { ChampEntree, ChampPesee, ChampProfil } from "@/services";
+import type {
+  ChampAlimentPersonnalise,
+  ChampEntree,
+  ChampPesee,
+  ChampPortion,
+  ChampProfil,
+  QuantiteEntree,
+} from "@/services";
 
 export const textes = {
   app: {
@@ -46,6 +53,7 @@ export const textes = {
     journal: "Journal",
     reglages: "Réglages",
     pesees: "Pesées",
+    mesAliments: "Mes aliments",
   },
   journal: {
     titre: "Journal",
@@ -82,6 +90,59 @@ export const textes = {
     pour100: (unite: "g" | "ml") => `Valeurs pour 100 ${unite}`,
     introuvable: "Cet aliment n'existe pas ou n'est plus disponible.",
     energie: "Énergie",
+    portions: "Portions",
+    portion: (nom: string, grammes: number, unite: "g" | "ml") => `${nom} = ${formaterNombre(grammes, 1)} ${unite}`,
+    modifierPersonnalise: "Modifier cet aliment",
+  },
+  personnalises: {
+    titre: "Mes aliments",
+    intro: "Vos Aliments personnalisés passent avant les Aliments génériques dans la recherche. Vous seul les voyez.",
+    creer: "Créer un aliment",
+    aucun: "Aucun Aliment personnalisé pour l'instant.",
+    nouveau: "Nouvel aliment",
+    modification: "Modifier l'aliment",
+    nom: "Nom",
+    unite: "Valeurs pour",
+    unites: { g: "100 g", ml: "100 ml" },
+    obligatoires: "Énergie et Macros",
+    facultatifs: "Facultatif",
+    kcal: "Énergie (kcal)",
+    nutriment: (nom: string) => `${nom} (g)`,
+    codeBarres: "Code-barres (facultatif)",
+    bouton: "Enregistrer",
+    enCours: "Enregistrement…",
+    enregistre: "Aliment enregistré.",
+    supprimer: "Supprimer l'aliment",
+    suppressionEnCours: "Suppression…",
+    aideSuppression: "Les entrées déjà notées avec cet aliment gardent leurs valeurs.",
+    introuvable: "Cet aliment n'existe pas.",
+    erreurGenerale: "Certains champs sont à corriger.",
+    erreurs: {
+      nom: "Indiquez un nom.",
+      unite: "Choisissez 100 g ou 100 ml.",
+      codeBarres: "Un code-barres compte 8 à 14 chiffres.",
+      kcal: "Indiquez une énergie entre 0 et 1 000 kcal.",
+      proteines: "Indiquez entre 0 et 100 g de protéines.",
+      glucides: "Indiquez entre 0 et 100 g de glucides.",
+      lipides: "Indiquez entre 0 et 100 g de lipides.",
+      fibres: "Indiquez entre 0 et 100 g de fibres, ou laissez vide.",
+      sucres: "Indiquez entre 0 et 100 g de sucres, ou laissez vide.",
+      satures: "Indiquez entre 0 et 100 g d'acides gras saturés, ou laissez vide.",
+      sel: "Indiquez entre 0 et 100 g de sel, ou laissez vide.",
+    } satisfies Record<ChampAlimentPersonnalise, string>,
+    portions: "Portions",
+    portionsIntro: "Par exemple « 1 bol » = 300 g : vous pourrez ensuite noter en bols.",
+    aucunePortion: "Aucune Portion pour l'instant.",
+    nomPortion: "Nom de la Portion",
+    grammesPortion: (unite: "g" | "ml") => `Équivaut à (${unite})`,
+    ajouterPortion: "Ajouter la Portion",
+    enregistrerPortion: "Enregistrer",
+    supprimerPortion: "Supprimer",
+    supprimerPortionLibelle: (nom: string) => `Supprimer la Portion ${nom}`,
+    erreursPortion: {
+      nom: "Indiquez un nom de Portion.",
+      grammes: "Indiquez un poids supérieur à 0.",
+    } satisfies Record<ChampPortion, string>,
   },
   nutriments: {
     kcal: "Énergie",
@@ -99,6 +160,8 @@ export const textes = {
     quantite: "Quantité",
     unite: "Unité",
     unites: { g: "g", ml: "ml" },
+    nombre: "Nombre",
+    aidePortion: (nom: string, grammes: string) => `1 × ${nom} = ${grammes}`,
     aideMillilitres: "1 ml compte pour 1 g.",
     repas: "Repas",
     apercu: "Pour cette quantité",
@@ -273,6 +336,12 @@ export function formaterNutriment(g: number | null): string {
 
 export function formaterQuantite(valeur: number, unite: string): string {
   return `${formaterNombre(valeur, 1)} ${unite}`;
+}
+
+/** La quantité d'une Entrée : « 150 g », ou « 1,5 × 1 bol (450 g) » en Portions. */
+export function formaterQuantiteEntree(q: QuantiteEntree, grammes: number): string {
+  if (q.unite !== "portion") return formaterQuantite(q.valeur, q.unite);
+  return `${formaterNombre(q.nombre, 2)} × ${q.nom} (${formaterGrammes(grammes)})`;
 }
 
 export function formaterJourCourt(jour: string): string {

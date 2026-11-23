@@ -55,7 +55,27 @@ export const aliment = pgTable(
     uniqueIndex("aliment_source_idx").on(t.type, t.codeSource),
     index("aliment_recherche_idx").using("gin", sql`to_tsvector('french', ${t.nomRecherche})`),
     index("aliment_proprietaire_idx").on(t.proprietaireId),
+    index("aliment_code_barres_idx").on(t.codeBarres),
   ],
+);
+
+/**
+ * Les Portions d'un Aliment (« 1 bol = 300 g »), quel que soit son type : l'utilisateur définit
+ * celles de ses Aliments personnalisés, les Produits reçoivent celles d'Open Food Facts.
+ * `grammes` est le poids (ou le volume, à 1 ml = 1 g) d'une Portion.
+ */
+export const portion = pgTable(
+  "portion",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    alimentId: uuid("aliment_id")
+      .notNull()
+      .references(() => aliment.id, { onDelete: "cascade" }),
+    nom: text("nom").notNull(),
+    grammes: doublePrecision("grammes").notNull(),
+    creeLe: timestamp("cree_le").defaultNow().notNull(),
+  },
+  (t) => [index("portion_aliment_idx").on(t.alimentId)],
 );
 
 /**
@@ -76,6 +96,13 @@ export const entree = pgTable(
     /** La quantité telle que saisie, dans `unite` (pour une Portion : le nombre de Portions). */
     quantite: doublePrecision("quantite").notNull(),
     unite: text("unite").$type<UniteQuantite>().notNull(),
+    /**
+     * Pour une quantité en Portions : la Portion d'origine (null si elle est supprimée) et une
+     * copie de son nom et de son poids au moment de la saisie (ADR-0001).
+     */
+    portionId: uuid("portion_id").references(() => portion.id, { onDelete: "set null" }),
+    portionNom: text("portion_nom"),
+    grammesParPortion: doublePrecision("grammes_par_portion"),
     /** La quantité convertie en grammes (1 ml = 1 g) : c'est elle qui sert aux calculs. */
     grammes: doublePrecision("grammes").notNull(),
     nom: text("nom").notNull(),

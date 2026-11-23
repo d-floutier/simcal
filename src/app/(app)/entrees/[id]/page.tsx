@@ -2,13 +2,14 @@ import Link from "next/link";
 import { FormulaireEntree } from "@/components/formulaire-entree";
 import { buttonVariants } from "@/components/ui/button";
 import { requireProfil } from "@/lib/profil";
-import { lireEntree } from "@/services";
+import { lireAliment, lireEntree } from "@/services";
 import { formaterJourCourt, textes } from "@/ui/textes";
 
 export default async function EntreePage(props: PageProps<"/entrees/[id]">) {
   const { ctx } = await requireProfil();
   const { id } = await props.params;
   const entree = await lireEntree(ctx, id);
+  const aliment = entree?.alimentId ? await lireAliment(ctx, entree.alimentId) : null;
 
   return (
     <div className="flex flex-col gap-4">
@@ -40,8 +41,10 @@ export default async function EntreePage(props: PageProps<"/entrees/[id]">) {
               entreeId={entree.id}
               repas={entree.repas}
               quantite={entree.quantite}
+              grammes={entree.grammes}
               pour100g={entree.pour100g}
-              uniteParDefaut={entree.quantite.unite}
+              uniteParDefaut={aliment?.unite ?? (entree.quantite.unite === "ml" ? "ml" : "g")}
+              portions={aliment?.portions ?? []}
             />
           </section>
         </>

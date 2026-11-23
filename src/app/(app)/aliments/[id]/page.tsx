@@ -33,6 +33,18 @@ export default async function AlimentPage(props: PageProps<"/aliments/[id]">) {
           <section className="rounded-xl bg-card p-4 ring-1 ring-foreground/10">
             <TableauNutriments valeurs={aliment.valeurs} titre={textes.aliment.pour100(aliment.unite)} />
           </section>
+          {aliment.portions.length > 0 && (
+            <section aria-labelledby="portions" className="rounded-xl bg-card p-4 ring-1 ring-foreground/10">
+              <h2 id="portions" className="pb-2 text-sm font-medium">
+                {textes.aliment.portions}
+              </h2>
+              <ul className="flex flex-col gap-1 text-sm">
+                {aliment.portions.map((p) => (
+                  <li key={p.id}>{textes.aliment.portion(p.nom, p.grammes, aliment.unite)}</li>
+                ))}
+              </ul>
+            </section>
+          )}
           <section aria-labelledby="noter" className="flex flex-col gap-3 rounded-xl bg-card p-4 ring-1 ring-foreground/10">
             <h2 id="noter" className="text-base font-semibold">
               {textes.entree.sectionAjout}
@@ -45,9 +57,18 @@ export default async function AlimentPage(props: PageProps<"/aliments/[id]">) {
               repas={repas}
               pour100g={aliment.valeurs}
               uniteParDefaut={aliment.unite}
+              portions={aliment.portions}
             />
           </section>
           {aliment.type === "generique" && <CreditCiqual />}
+          {aliment.type === "personnalise" && (
+            <Link
+              href={`/mes-aliments/${aliment.id}`}
+              className={buttonVariants({ variant: "outline", size: "sm", className: "self-start" })}
+            >
+              {textes.aliment.modifierPersonnalise}
+            </Link>
+          )}
         </>
       )}
     </div>

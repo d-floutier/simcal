@@ -13,6 +13,7 @@ export {
   type ChampEntree,
   type Entree,
   type JournalDuJour,
+  type QuantiteEntree,
   type QuantiteSaisie,
   type SaisieEntree,
 } from "./journal";
@@ -30,6 +31,7 @@ export {
   sourcesParDefaut,
   type AlimentResume,
   type FicheAliment,
+  type Portion,
   type SourceAliments,
 } from "./aliments";
 export {
@@ -43,3 +45,20 @@ export {
   type ChampPesee,
   type Pesee,
 } from "./pesees";
+export {
+  AlimentIntrouvable,
+  ajouterPortion,
+  creerAlimentPersonnalise,
+  listerAlimentsPersonnalises,
+  modifierAlimentPersonnalise,
+  modifierPortion,
+  PortionIntrouvable,
+  SaisieAlimentInvalide,
+  SaisiePortionInvalide,
+  supprimerAlimentPersonnalise,
+  supprimerPortion,
+  type ChampAlimentPersonnalise,
+  type ChampPortion,
+  type SaisieAlimentPersonnalise,
+  type SaisiePortion,
+} from "./personnalises";

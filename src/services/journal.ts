@@ -14,16 +14,26 @@ import {
   type Repas,
   type ValeursNutritionnelles,
 } from "@/core";
-import { entree as tableEntree, profil } from "@/db/schema";
+import { entree as tableEntree, portion as tablePortion, profil } from "@/db/schema";
 import { estUuid, lireAliment } from "./aliments";
 import type { Contexte } from "./contexte";
 import { objectifDuJour } from "./profil";
 
 /**
- * Une quantité saisie pour une Entrée. Le ticket des Portions y ajoutera
- * `{ unite: "portion"; portionId; nombre }`, résolu en `Quantite` du noyau par le service.
+ * Une quantité saisie pour une Entrée : en g, en ml, ou en nombre de Portions de l'Aliment.
+ * Le service résout la Portion en `Quantite` du noyau, qui la convertit en grammes.
  */
-export type QuantiteSaisie = { unite: "g" | "ml"; valeur: number };
+export type QuantiteSaisie =
+  | { unite: "g" | "ml"; valeur: number }
+  | { unite: "portion"; portionId: string; nombre: number };
+
+/**
+ * La quantité d'une Entrée notée. En Portions, elle garde une copie du nom et du poids de la
+ * Portion au moment de la saisie (ADR-0001) ; `portionId` devient null si la Portion est supprimée.
+ */
+export type QuantiteEntree =
+  | { unite: "g" | "ml"; valeur: number }
+  | { unite: "portion"; portionId: string | null; nombre: number; nom: string; grammesParPortion: number };
 
 /** Une Entrée du Journal, avec la copie de ses valeurs pour 100 g et ses valeurs pour sa quantité. */
 export type Entree = {
@@ -34,7 +44,7 @@ export type Entree = {
   alimentId: string | null;
   nom: string;
   marque: string | null;
-  quantite: QuantiteSaisie;
+  quantite: QuantiteEntree;
   grammes: number;
   pour100g: ValeursNutritionnelles;
   valeurs: ValeursNutritionnelles;
@@ -98,7 +108,16 @@ function versEntree(l: LigneEntree): Entree {
     alimentId: l.alimentId,
     nom: l.nom,
     marque: l.marque,
-    quantite: { unite: l.unite as QuantiteSaisie["unite"], valeur: l.quantite },
+    quantite:
+      l.unite === "portion"
+        ? {
+            unite: "portion",
+            portionId: l.portionId,
+            nombre: l.quantite,
+            nom: l.portionNom ?? "",
+            grammesParPortion: l.grammesParPortion ?? l.grammes / l.quantite,
+          }
+        : { unite: l.unite, valeur: l.quantite },
     grammes: l.grammes,
     pour100g,
     valeurs: valeursEntree(pour100g, l.grammes),
@@ -127,10 +146,44 @@ export async function lireJournal(ctx: Contexte, jour: Jour): Promise<JournalDuJ
   };
 }
 
+const nombreValide = (n: unknown, max: number): n is number =>
+  typeof n === "number" && Number.isFinite(n) && n > 0 && n <= max;
+
 function quantiteValide(q: QuantiteSaisie | undefined): q is QuantiteSaisie {
-  return (
-    !!q && (q.unite === "g" || q.unite === "ml") && Number.isFinite(q.valeur) && q.valeur > 0 && q.valeur <= 100_000
-  );
+  if (!q) return false;
+  if (q.unite === "portion") return estUuid(q.portionId) && nombreValide(q.nombre, 1000);
+  return (q.unite === "g" || q.unite === "ml") && nombreValide(q.valeur, 100_000);
+}
+
+/** Les colonnes de la quantité d'une Entrée : la Portion est cherchée parmi celles de l'Aliment. */
+type ColonnesQuantite = Pick<
+  LigneEntree,
+  "quantite" | "unite" | "grammes" | "portionId" | "portionNom" | "grammesParPortion"
+>;
+
+async function colonnesQuantite(
+  ctx: Contexte,
+  alimentId: string | null,
+  q: QuantiteSaisie,
+): Promise<ColonnesQuantite | null> {
+  if (q.unite !== "portion") {
+    return { quantite: q.valeur, unite: q.unite, grammes: quantiteEnGrammes(q), portionId: null, portionNom: null, grammesParPortion: null };
+  }
+  if (!alimentId) return null;
+  const [p] = await ctx.db
+    .select()
+    .from(tablePortion)
+    .where(and(eq(tablePortion.id, q.portionId), eq(tablePortion.alimentId, alimentId)));
+  if (!p) return null;
+  const quantite: Quantite = { unite: "portion", nombre: q.nombre, grammesParPortion: p.grammes };
+  return {
+    quantite: q.nombre,
+    unite: "portion",
+    grammes: quantiteEnGrammes(quantite),
+    portionId: p.id,
+    portionNom: p.nom,
+    grammesParPortion: p.grammes,
+  };
 }
 
 const repasValide = (r: unknown): r is Repas => REPAS.includes(r as Repas);
@@ -154,7 +207,10 @@ export async function ajouterEntree(ctx: Contexte, saisie: SaisieEntree, instant
   if (!quantiteValide(saisie.quantite)) invalides.push("quantite");
   const aliment = await lireAliment(ctx, saisie.alimentId);
   if (!aliment) invalides.push("aliment");
-  if (invalides.length > 0 || !aliment) throw new SaisieEntreeInvalide(invalides);
+  const quantite =
+    aliment && invalides.length === 0 ? await colonnesQuantite(ctx, aliment.id, saisie.quantite) : null;
+  if (aliment && invalides.length === 0 && !quantite) invalides.push("quantite");
+  if (invalides.length > 0 || !aliment || !quantite) throw new SaisieEntreeInvalide(invalides);
 
   const auj = await aujourdhui(ctx, instant);
   if (saisie.jour > auj) throw new JourFutur(saisie.jour, auj);
@@ -166,9 +222,7 @@ export async function ajouterEntree(ctx: Contexte, saisie: SaisieEntree, instant
       jour: saisie.jour,
       repas: saisie.repas,
       alimentId: aliment.id,
-      quantite: saisie.quantite.valeur,
-      unite: saisie.quantite.unite,
-      grammes: quantiteEnGrammes(saisie.quantite satisfies Quantite),
+      ...quantite,
       nom: aliment.nom,
       marque: aliment.marque,
       ...aliment.valeurs,
@@ -189,16 +243,17 @@ export async function modifierEntree(
   if (invalides.length > 0) throw new SaisieEntreeInvalide(invalides);
   if (!estUuid(id)) throw new EntreeIntrouvable(id);
 
+  let quantite: ColonnesQuantite | null = null;
+  if (modif.quantite) {
+    const actuelle = await lireEntree(ctx, id);
+    if (!actuelle) throw new EntreeIntrouvable(id);
+    quantite = await colonnesQuantite(ctx, actuelle.alimentId, modif.quantite);
+    if (!quantite) throw new SaisieEntreeInvalide(["quantite"]);
+  }
+
   const [ligne] = await ctx.db
     .update(tableEntree)
-    .set({
-      ...(modif.repas && { repas: modif.repas }),
-      ...(modif.quantite && {
-        quantite: modif.quantite.valeur,
-        unite: modif.quantite.unite,
-        grammes: quantiteEnGrammes(modif.quantite),
-      }),
-    })
+    .set({ ...(modif.repas && { repas: modif.repas }), ...quantite })
     .where(and(eq(tableEntree.id, id), eq(tableEntree.userId, ctx.userId)))
     .returning();
   if (!ligne) throw new EntreeIntrouvable(id);

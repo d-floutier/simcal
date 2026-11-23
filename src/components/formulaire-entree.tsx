@@ -1,7 +1,14 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { quantiteEnGrammes, REPAS, valeursEntree, type Repas, type ValeursNutritionnelles } from "@/core";
+import {
+  quantiteEnGrammes,
+  REPAS,
+  valeursEntree,
+  type Quantite,
+  type Repas,
+  type ValeursNutritionnelles,
+} from "@/core";
 import {
   ajouterEntreeAction,
   modifierEntreeAction,
@@ -13,31 +20,64 @@ import { TableauNutriments } from "@/components/tableau-nutriments";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { textes } from "@/ui/textes";
+import type { Portion, QuantiteEntree } from "@/services";
+import { formaterQuantite, textes } from "@/ui/textes";
 
 const t = textes.entree;
 
 type Props = {
   pour100g: ValeursNutritionnelles;
   repas: Repas;
-  quantite?: { unite: "g" | "ml"; valeur: number };
+  /** La quantité déjà notée (modification), et son équivalent en grammes. */
+  quantite?: QuantiteEntree;
+  grammes?: number;
   uniteParDefaut: "g" | "ml";
+  /** Les Portions de l'Aliment, proposées à la place des grammes. */
+  portions?: Portion[];
 } & ({ mode: "ajout"; alimentId: string; jour: string } | { mode: "modification"; entreeId: string });
 
 const lireNombre = (s: string) => (s.trim() === "" ? Number.NaN : Number(s.replace(",", ".")));
+const afficherNombre = (n: number) => String(n).replace(".", ",");
+/** La valeur du choix d'unité pour une Portion (lue par l'action). */
+const valeurPortion = (id: string) => `portion:${id}`;
+
+/** L'unité et la quantité affichées au départ. Une Portion supprimée depuis repasse en grammes. */
+function saisieInitiale(props: Props): { unite: string; quantite: string } {
+  const q = props.quantite;
+  if (!q) return { unite: props.uniteParDefaut, quantite: "100" };
+  if (q.unite !== "portion") return { unite: q.unite, quantite: afficherNombre(q.valeur) };
+  if (q.portionId && props.portions?.some((p) => p.id === q.portionId)) {
+    return { unite: valeurPortion(q.portionId), quantite: afficherNombre(q.nombre) };
+  }
+  return { unite: "g", quantite: afficherNombre(props.grammes ?? q.nombre * q.grammesParPortion) };
+}
 
 /**
- * La saisie d'une Entrée : quantité en g ou en ml et Repas. Les kcal et les Macros de l'Entrée
- * sont recalculées par le noyau pendant la saisie.
+ * La saisie d'une Entrée : quantité en g, en ml ou en Portions de l'Aliment, et Repas. Les kcal et
+ * les Macros de l'Entrée sont recalculées par le noyau pendant la saisie.
  */
 export function FormulaireEntree(props: Props) {
   const action = props.mode === "ajout" ? ajouterEntreeAction : modifierEntreeAction;
   const [etat, envoyer, enCours] = useActionState<EtatEntree, FormData>(action, {});
   const garde = useGardeHorsLigne();
-  const [quantite, setQuantite] = useState(props.quantite ? String(props.quantite.valeur).replace(".", ",") : "100");
-  const [unite, setUnite] = useState(props.quantite?.unite ?? props.uniteParDefaut);
-  const grammes = quantiteEnGrammes({ unite, valeur: lireNombre(quantite) });
+  const initiale = saisieInitiale(props);
+  const [quantite, setQuantite] = useState(initiale.quantite);
+  const [unite, setUnite] = useState(initiale.unite);
+  const portions = props.portions ?? [];
+  const portion = portions.find((p) => valeurPortion(p.id) === unite);
+  const saisie: Quantite = portion
+    ? { unite: "portion", nombre: lireNombre(quantite), grammesParPortion: portion.grammes }
+    : { unite: unite === "ml" ? "ml" : "g", valeur: lireNombre(quantite) };
+  const grammes = quantiteEnGrammes(saisie);
   const apercu = grammes > 0 ? valeursEntree(props.pour100g, grammes) : null;
+
+  function changerUnite(nouvelle: string) {
+    const enPortion = portions.some((p) => valeurPortion(p.id) === nouvelle);
+    // Passer des grammes aux Portions (ou l'inverse) repart d'une quantité usuelle.
+    if (enPortion && !portion) setQuantite("1");
+    if (!enPortion && portion) setQuantite("100");
+    setUnite(nouvelle);
+  }
   const erreurQuantite = etat.erreurs?.includes("quantite");
 
   return (
@@ -52,9 +92,9 @@ export function FormulaireEntree(props: Props) {
           <input type="hidden" name="id" value={props.entreeId} />
         )}
 
-        <div className="grid grid-cols-[1fr_6rem] gap-3">
+        <div className={`grid gap-3 ${portions.length > 0 ? "grid-cols-[6rem_1fr]" : "grid-cols-[1fr_6rem]"}`}>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="quantite">{t.quantite}</Label>
+            <Label htmlFor="quantite">{portion ? t.nombre : t.quantite}</Label>
             <Input
               id="quantite"
               name="quantite"
@@ -73,9 +113,14 @@ export function FormulaireEntree(props: Props) {
               id="unite"
               name="unite"
               value={unite}
-              onChange={(e) => setUnite(e.target.value as "g" | "ml")}
-              className="h-10 rounded-lg border border-input bg-transparent px-2 text-base md:text-sm dark:bg-input/30"
+              onChange={(e) => changerUnite(e.target.value)}
+              className="h-10 min-w-0 rounded-lg border border-input bg-transparent px-2 text-base md:text-sm dark:bg-input/30"
             >
+              {portions.map((p) => (
+                <option key={p.id} value={valeurPortion(p.id)}>
+                  {p.nom}
+                </option>
+              ))}
               <option value="g">{t.unites.g}</option>
               <option value="ml">{t.unites.ml}</option>
             </select>
@@ -84,6 +129,10 @@ export function FormulaireEntree(props: Props) {
         {erreurQuantite ? (
           <p id="quantite-erreur" className="-mt-2 text-sm text-destructive">
             {t.erreurs.quantite}
+          </p>
+        ) : portion ? (
+          <p id="quantite-aide" className="-mt-2 text-xs text-muted-foreground">
+            {t.aidePortion(portion.nom, formaterQuantite(portion.grammes, props.uniteParDefaut))}
           </p>
         ) : (
           unite === "ml" && (
