@@ -1,6 +1,6 @@
 // Tous les textes de l'interface, en français, regroupés ici pour une traduction future.
 import type { NiveauActivite, Repas, Rythme, SensObjectif, Sexe } from "@/core";
-import type { ChampEntree, ChampPesee, ChampProfil } from "@/services";
+import type { ChampEntree, ChampHydratation, ChampPesee, ChampProfil } from "@/services";
 
 export const textes = {
   app: {
@@ -228,6 +228,29 @@ export const textes = {
       refuser: "Non, garder mon Objectif",
     },
   },
+  hydratation: {
+    titre: "Hydratation",
+    progression: (bu: string, objectif: string) => `${bu} sur ${objectif}`,
+    atteint: "Objectif d'hydratation atteint",
+    ajouterVerre: (verre: string) => `+ 1 Verre (${verre})`,
+    ajouterVerreLibelle: (verre: string) => `Ajouter un Verre de ${verre}`,
+    retirerVerre: "Retirer un Verre",
+    nonCompte: "Seuls les Verres comptent : les boissons notées dans le Journal n'y entrent pas.",
+    reglages: {
+      titre: "Hydratation",
+      intro: "Un nouvel Objectif d'hydratation s'applique à partir d'aujourd'hui. La taille du Verre vaut pour les prochains Verres.",
+      objectifMl: "Objectif d'hydratation (ml par jour)",
+      verreMl: "Taille du Verre (ml)",
+      // Pas « Enregistrer » : la page des réglages a déjà ce bouton pour le Profil.
+      bouton: "Appliquer à l'hydratation",
+      enCours: "Mise à jour…",
+      enregistre: "Hydratation mise à jour.",
+    },
+    erreurs: {
+      objectifMl: "Indiquez un nombre entier de ml entre 250 et 10 000.",
+      verreMl: "Indiquez un nombre entier de ml entre 10 et 2 000.",
+    } satisfies Record<ChampHydratation, string>,
+  },
   horsLigne: {
     indicateur: "Hors ligne",
     saisieImpossible:
@@ -251,6 +274,10 @@ export function formaterJourLong(jour: string): string {
 /** Les arrondis se font uniquement à l'affichage. */
 export function formaterNombre(n: number, decimales = 0): string {
   return new Intl.NumberFormat("fr-FR", { maximumFractionDigits: decimales }).format(n);
+}
+
+export function formaterLitres(ml: number): string {
+  return `${formaterNombre(ml / 1000, 2)} L`;
 }
 
 export function formaterKg(kg: number): string {

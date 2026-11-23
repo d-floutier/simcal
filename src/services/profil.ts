@@ -163,13 +163,18 @@ export async function enregistrerProfil(
   const objectif = calculerObjectif(parametres, jour);
   const ligne = versLigne(parametres);
   await ctx.db.transaction(async (tx) => {
+    // L'Objectif d'hydratation n'est pas saisi ici : la nouvelle ligne d'historique reporte le courant.
+    const [courant] = await tx
+      .select({ objectifHydratationMl: profil.objectifHydratationMl })
+      .from(profil)
+      .where(eq(profil.userId, ctx.userId));
     await tx
       .insert(profil)
       .values({ userId: ctx.userId, fuseau, ...ligne })
       .onConflictDoUpdate({ target: profil.userId, set: { fuseau, ...ligne, misAJour: new Date() } });
     await tx
       .insert(objectifHistorique)
-      .values({ userId: ctx.userId, depuis: jour, ...ligne })
+      .values({ userId: ctx.userId, depuis: jour, ...ligne, ...courant })
       .onConflictDoUpdate({ target: [objectifHistorique.userId, objectifHistorique.depuis], set: ligne });
   });
   return { jour, objectif };

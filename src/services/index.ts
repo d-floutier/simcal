@@ -43,3 +43,16 @@ export {
   type ChampPesee,
   type Pesee,
 } from "./pesees";
+export {
+  ajouterVerre,
+  BORNES_HYDRATATION,
+  lireHydratation,
+  lireReglagesHydratation,
+  modifierReglagesHydratation,
+  objectifHydratationDuJour,
+  ReglagesHydratationInvalides,
+  retirerVerre,
+  type ChampHydratation,
+  type HydratationDuJour,
+  type ReglagesHydratation,
+} from "./hydratation";

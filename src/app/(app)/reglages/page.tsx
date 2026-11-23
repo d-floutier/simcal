@@ -1,12 +1,15 @@
 import Link from "next/link";
+import { FormulaireHydratation } from "@/components/hydratation";
 import { FormulaireProfil } from "@/components/formulaire-profil";
 import { buttonVariants } from "@/components/ui/button";
 import { FUSEAU_PAR_DEFAUT, listeFuseaux } from "@/lib/fuseaux";
 import { requireProfil } from "@/lib/profil";
+import { lireReglagesHydratation } from "@/services";
 import { textes } from "@/ui/textes";
 
 export default async function ReglagesPage() {
-  const { profil } = await requireProfil();
+  const { ctx, profil } = await requireProfil();
+  const reglagesHydratation = await lireReglagesHydratation(ctx);
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
@@ -17,6 +20,8 @@ export default async function ReglagesPage() {
         <p className="text-sm text-muted-foreground">{textes.reglages.intro}</p>
       </div>
       <FormulaireProfil profil={profil} fuseaux={listeFuseaux()} fuseauParDefaut={FUSEAU_PAR_DEFAUT} />
+      <hr />
+      <FormulaireHydratation reglages={reglagesHydratation} />
     </div>
   );
 }
