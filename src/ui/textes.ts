@@ -48,6 +48,14 @@ export const textes = {
     aujourdhui: "Aujourd'hui",
     repasVide: "Rien de noté pour l'instant.",
   },
+  horsLigne: {
+    indicateur: "Hors ligne",
+    saisieImpossible:
+      "Pas de connexion : rien n'a été enregistré. Une connexion est nécessaire pour noter.",
+    pageTitre: "Pas de connexion",
+    pageTexte: "Simcal a besoin d'une connexion pour afficher et noter vos repas.",
+    reessayer: "Réessayer",
+  },
 } as const;
 
 export function formaterJourLong(jour: string): string {

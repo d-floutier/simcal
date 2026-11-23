@@ -58,3 +58,9 @@ Sur Vercel, sans `DATABASE_URL`, l'app refuse d'ouvrir une base (pas de repli su
 - `src/ui/textes.ts` : tous les textes de l'interface.
 - `src/app` : les pages. `(public)` pour la connexion et l'inscription, `(app)` pour les pages qui exigent une session.
 - `src/test` : les outils de test (`createTestDb`, `creerUtilisateur`).
+
+## PWA et hors ligne
+
+- Manifeste : `src/app/manifest.ts` ; icônes dans `public/` (source `public/icone.svg`) et `src/app/apple-icon.png` pour iOS.
+- Service worker (Serwist, `src/app/sw.ts`, servi à `/serwist/sw.js`, production seulement) : il précache uniquement l'interface (fichiers de build, icônes, page `/~offline`). Aucune page, réponse RSC ou API n'est mise en cache, car elles contiennent des données personnelles. Hors ligne, toute page demandée affiche `/~offline`.
+- Tout formulaire qui enregistre utilise la garde de `src/components/hors-ligne.tsx` : `const garde = useGardeHorsLigne()`, puis `<form onSubmit={garde.onSubmit}>` et `{garde.saisieBloquee && <AlerteHorsLigne />}`. Hors ligne, rien n'est envoyé ni mis en attente. Pour un envoi sans `<form>`, tester `useEnLigne()` avant d'envoyer.

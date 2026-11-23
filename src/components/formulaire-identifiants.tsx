@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { AlerteHorsLigne, useGardeHorsLigne } from "@/components/hors-ligne";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,8 +18,9 @@ type Props = {
 
 export function FormulaireIdentifiants(props: Props) {
   const [etat, action, enCours] = useActionState(props.action, {});
+  const garde = useGardeHorsLigne();
   return (
-    <form action={action} className="flex flex-col gap-4">
+    <form action={action} onSubmit={garde.onSubmit} className="flex flex-col gap-4">
       <div className="flex flex-col gap-2">
         <Label htmlFor="email">{textes.champs.email}</Label>
         <Input
@@ -47,6 +49,7 @@ export function FormulaireIdentifiants(props: Props) {
           <p className="text-xs text-muted-foreground">{props.aideMotDePasse}</p>
         )}
       </div>
+      {garde.saisieBloquee && <AlerteHorsLigne />}
       {etat.erreur && (
         <p role="alert" className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {etat.erreur}
