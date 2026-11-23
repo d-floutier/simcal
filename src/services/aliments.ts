@@ -137,6 +137,43 @@ export async function chercherAliments(
   return [recents, ...parSource].flat().filter((a) => !vus.has(a.id) && vus.add(a.id));
 }
 
+/**
+ * Le résultat de la recherche d'un Code-barres : l'Aliment trouvé, ou le code introuvable,
+ * pour que l'interface propose de créer un Aliment personnalisé lié à ce code.
+ * `invalide` : ce n'est pas un Code-barres (8 à 14 chiffres). `horsService` : une source n'a
+ * pas répondu, le code existe peut-être.
+ */
+export type ResultatCodeBarres =
+  | { trouve: true; aliment: AlimentResume }
+  | { trouve: false; code: string; invalide?: true; horsService?: true };
+
+const CODE_BARRES = /^\d{8,14}$/;
+
+/**
+ * Trouve un Aliment par son Code-barres : le premier trouvé dans l'ordre des sources
+ * (Aliment personnalisé lié au code, puis Produit gardé en base, puis Open Food Facts, qui ne
+ * reçoit que le code). Les espaces tapés dans le code sont ignorés.
+ */
+export async function trouverParCodeBarres(
+  ctx: Contexte,
+  saisie: string,
+  sources: SourceAliments[] = sourcesParDefaut(ctx),
+): Promise<ResultatCodeBarres> {
+  const code = saisie.replace(/\s/g, "");
+  if (!CODE_BARRES.test(code)) return { trouve: false, code: saisie, invalide: true };
+  let horsService = false;
+  for (const source of sources) {
+    try {
+      const aliment = await source.trouverParCodeBarres(code);
+      if (aliment) return { trouve: true, aliment };
+    } catch (e) {
+      console.error(e);
+      horsService = true;
+    }
+  }
+  return horsService ? { trouve: false, code, horsService: true } : { trouve: false, code };
+}
+
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export const estUuid = (id: string) => UUID.test(id);
 

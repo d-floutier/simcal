@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ScanBarcode } from "lucide-react";
 import { ChampRecherche } from "@/components/champ-recherche";
 import { CreditCiqual, CreditOpenFoodFacts } from "@/components/credit-ciqual";
 import { buttonVariants } from "@/components/ui/button";
@@ -33,6 +34,10 @@ export default async function AjouterPage(props: PageProps<"/ajouter">) {
       </div>
 
       <ChampRecherche valeurInitiale={q} />
+      <Link href={`/scan?${suite}`} className={buttonVariants({ variant: "outline", className: "h-11" })}>
+        <ScanBarcode aria-hidden />
+        {textes.scan.lien}
+      </Link>
 
       {q.trim() !== "" && (
         <section aria-label={t.resultats}>
