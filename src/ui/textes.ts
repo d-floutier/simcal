@@ -1,6 +1,6 @@
 // Tous les textes de l'interface, en français, regroupés ici pour une traduction future.
 import type { NiveauActivite, Repas, Rythme, SensObjectif, Sexe } from "@/core";
-import type { ChampEntree, ChampProfil } from "@/services";
+import type { ChampEntree, ChampPesee, ChampProfil } from "@/services";
 
 export const textes = {
   app: {
@@ -45,6 +45,7 @@ export const textes = {
     deconnexion: "Se déconnecter",
     journal: "Journal",
     reglages: "Réglages",
+    pesees: "Pesées",
   },
   journal: {
     titre: "Journal",
@@ -193,6 +194,40 @@ export const textes = {
     plancherApplique: (plancher: number) =>
       `Votre Objectif calorique a été relevé au plancher de sécurité (${formaterKcal(plancher)}) : le Rythme choisi demanderait de manger moins, ce qui n'est pas recommandé. Choisissez un Rythme plus doux pour un objectif atteignable.`,
   },
+  pesees: {
+    titre: "Pesées",
+    intro: "Votre Pesée la plus récente devient le poids de votre Profil et recalcule votre objectif à partir de son jour.",
+    poidsActuel: "Poids actuel",
+    poidsCible: "Poids cible",
+    resteAPerdre: (kg: string) => `Encore ${kg} à perdre`,
+    resteAPrendre: (kg: string) => `Encore ${kg} à prendre`,
+    cibleAtteinte: "Poids cible atteint",
+    nouvelle: "Noter une Pesée",
+    modification: "Modifier la Pesée",
+    jour: "Jour",
+    poidsKg: "Poids (kg)",
+    remplace: "Une Pesée déjà notée ce jour-là sera remplacée.",
+    bouton: "Enregistrer",
+    enCours: "Enregistrement…",
+    annuler: "Annuler",
+    enregistree: "Pesée enregistrée.",
+    historique: "Historique",
+    aucune: "Aucune Pesée pour l'instant.",
+    modifier: "Modifier",
+    supprimer: "Supprimer",
+    supprimerLibelle: (jour: string) => `Supprimer la Pesée du ${jour}`,
+    modifierLibelle: (jour: string) => `Modifier la Pesée du ${jour}`,
+    erreurs: {
+      jour: "Choisissez aujourd'hui ou un jour passé.",
+      poidsKg: "Indiquez un poids entre 20 et 500 kg.",
+    } satisfies Record<ChampPesee, string>,
+    proposition: {
+      titre: "Poids cible atteint, bravo !",
+      texte: "Voulez-vous passer en Objectif « maintenir » ? Votre Objectif calorique sera recalculé à partir d'aujourd'hui.",
+      accepter: "Passer en « maintenir »",
+      refuser: "Non, garder mon Objectif",
+    },
+  },
   horsLigne: {
     indicateur: "Hors ligne",
     saisieImpossible:
@@ -216,6 +251,10 @@ export function formaterJourLong(jour: string): string {
 /** Les arrondis se font uniquement à l'affichage. */
 export function formaterNombre(n: number, decimales = 0): string {
   return new Intl.NumberFormat("fr-FR", { maximumFractionDigits: decimales }).format(n);
+}
+
+export function formaterKg(kg: number): string {
+  return `${formaterNombre(kg, 1)} kg`;
 }
 
 export function formaterKcal(kcal: number): string {

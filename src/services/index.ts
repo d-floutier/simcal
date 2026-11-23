@@ -32,3 +32,14 @@ export {
   type FicheAliment,
   type SourceAliments,
 } from "./aliments";
+export {
+  enregistrerPesee,
+  listerPesees,
+  passerEnMaintien,
+  PeseeInvalide,
+  propositionMaintien,
+  refuserMaintien,
+  supprimerPesee,
+  type ChampPesee,
+  type Pesee,
+} from "./pesees";

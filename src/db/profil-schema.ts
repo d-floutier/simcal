@@ -24,6 +24,11 @@ export const profil = pgTable("profil", {
     .references(() => user.id, { onDelete: "cascade" }),
   fuseau: text("fuseau").notNull(),
   ...parametresObjectif(),
+  /**
+   * L'Objectif (« perdre:72 ») pour lequel l'utilisateur a refusé de passer en « maintenir »
+   * une fois son Poids cible atteint : la proposition ne revient pas tant qu'il est inchangé.
+   */
+  maintienRefusePour: text("maintien_refuse_pour"),
   misAJour: timestamp("mis_a_jour").defaultNow().notNull(),
 });
 
