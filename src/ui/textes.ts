@@ -203,6 +203,21 @@ export const textes = {
     intro: "Un changement s'applique à partir d'aujourd'hui : les jours passés gardent leur objectif.",
     enregistre: "Enregistré. Votre nouvel objectif s'applique à partir d'aujourd'hui.",
   },
+  compte: {
+    titre: "Vos données",
+    exportIntro:
+      "Téléchargez toutes vos données (profil, objectifs, journal, pesées, hydratation, aliments personnalisés) dans un fichier JSON.",
+    exporter: "Exporter mes données",
+    suppressionTitre: "Supprimer mon compte",
+    suppressionIntro:
+      "La suppression est définitive : votre compte et toutes vos données sont effacés. Exportez-les d'abord si vous voulez en garder une copie.",
+    supprimer: "Supprimer mon compte…",
+    confirmationLibelle: (email: string) => `Pour confirmer, retapez votre email (${email})`,
+    confirmer: "Supprimer définitivement",
+    enCours: "Suppression…",
+    annuler: "Annuler",
+    confirmationIncorrecte: "Ce n'est pas l'email de votre compte : rien n'a été supprimé.",
+  },
   profil: {
     sectionProfil: "Votre profil",
     sectionObjectif: "Votre objectif de poids",

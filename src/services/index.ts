@@ -69,11 +69,13 @@ export {
   ajouterVerre,
   BORNES_HYDRATATION,
   lireHydratation,
+  listerAjoutsHydratation,
   lireReglagesHydratation,
   modifierReglagesHydratation,
   objectifHydratationDuJour,
   ReglagesHydratationInvalides,
   retirerVerre,
+  type AjoutHydratation,
   type ChampHydratation,
   type HydratationDuJour,
   type ReglagesHydratation,
@@ -84,3 +86,4 @@ export {
   type PeriodeStatistiques,
   type Statistiques,
 } from "./statistiques";
+export { ConfirmationSuppressionIncorrecte, exporterDonnees, supprimerCompte, type ExportDonnees } from "./compte";

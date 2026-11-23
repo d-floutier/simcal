@@ -1,4 +1,4 @@
-import { and, desc, eq, gt, lte, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gt, lte, sql } from "drizzle-orm";
 import { estJourValide, jourCalendaire, type Jour } from "@/core";
 import { ajoutHydratation, objectifHistorique, profil } from "@/db/schema";
 import type { Contexte } from "./contexte";
@@ -54,6 +54,18 @@ export async function lireHydratation(ctx: Contexte, jour: Jour): Promise<Hydrat
     verreMl: reglages.verreMl,
     ajouts: somme.ajouts,
   };
+}
+
+/** Un ajout d'Hydratation : un Verre noté pour un jour, de la taille réglée à ce moment-là. */
+export type AjoutHydratation = { jour: Jour; ml: number; creeLe: Date };
+
+/** Tous les ajouts d'Hydratation de l'utilisateur, du plus ancien au plus récent. */
+export async function listerAjoutsHydratation(ctx: Contexte): Promise<AjoutHydratation[]> {
+  return ctx.db
+    .select({ jour: ajoutHydratation.jour, ml: ajoutHydratation.ml, creeLe: ajoutHydratation.creeLe })
+    .from(ajoutHydratation)
+    .where(eq(ajoutHydratation.userId, ctx.userId))
+    .orderBy(asc(ajoutHydratation.jour), asc(ajoutHydratation.id));
 }
 
 /** Ajoute un Verre de la taille réglée au jour donné (aujourd'hui ou un jour passé). */
