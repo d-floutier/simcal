@@ -19,6 +19,7 @@ import { enregistrerProfilAction } from "@/app/(app)/actions-profil";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { AlerteHorsLigne, useGardeHorsLigne } from "@/components/hors-ligne";
 import { ResumeObjectif } from "@/components/resume-objectif";
 import { textes } from "@/ui/textes";
 
@@ -106,6 +107,7 @@ type Props = {
 
 export function FormulaireProfil({ profil, fuseaux, fuseauParDefaut, apres }: Props) {
   const [etat, action, enCours] = useActionState(enregistrerProfilAction, {});
+  const garde = useGardeHorsLigne();
   const [v, setV] = useState(() => valeursInitiales(profil, fuseauParDefaut));
   const changer = (champ: keyof Valeurs) => (e: { target: { value: string } }) =>
     setV((avant) => ({ ...avant, [champ]: e.target.value }));
@@ -117,7 +119,7 @@ export function FormulaireProfil({ profil, fuseaux, fuseauParDefaut, apres }: Pr
   const perdreOuPrendre = v.sens === "perdre" || v.sens === "prendre";
 
   return (
-    <form action={action} className="flex flex-col gap-6">
+    <form action={action} onSubmit={garde.onSubmit} className="flex flex-col gap-6">
       {apres && <input type="hidden" name="apres" value={apres} />}
 
       <Section titre={t.sectionProfil}>
@@ -280,6 +282,7 @@ export function FormulaireProfil({ profil, fuseaux, fuseauParDefaut, apres }: Pr
 
       <ResumeObjectif objectif={objectif} titre={textes.objectif.titre} masquerMacros={!totalOk} />
 
+      {garde.saisieBloquee && <AlerteHorsLigne />}
       {(etat.erreurs?.length || etat.erreur) && (
         <p role="alert" className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {etat.erreur ?? [t.erreurGenerale, ...etat.erreurs!.map((c) => t.erreurs[c])].join(" ")}

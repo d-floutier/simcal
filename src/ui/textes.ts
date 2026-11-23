@@ -124,6 +124,14 @@ export const textes = {
     plancherApplique: (plancher: number) =>
       `Votre Objectif calorique a été relevé au plancher de sécurité (${formaterKcal(plancher)}) : le Rythme choisi demanderait de manger moins, ce qui n'est pas recommandé. Choisissez un Rythme plus doux pour un objectif atteignable.`,
   },
+  horsLigne: {
+    indicateur: "Hors ligne",
+    saisieImpossible:
+      "Pas de connexion : rien n'a été enregistré. Une connexion est nécessaire pour noter.",
+    pageTitre: "Pas de connexion",
+    pageTexte: "Simcal a besoin d'une connexion pour afficher et noter vos repas.",
+    reessayer: "Réessayer",
+  },
 } as const;
 
 export function formaterJourLong(jour: string): string {

@@ -37,7 +37,7 @@ test("la première configuration est obligatoire, puis le Journal affiche l'obje
   await page.getByRole("radio", { name: "0,75 kg par semaine" }).check();
   await expect(page.getByText(/plancher de sécurité/)).toBeVisible();
   await page.getByRole("button", { name: "Enregistrer" }).click();
-  await expect(page.getByRole("status")).toContainText("Enregistré");
+  await expect(page.getByRole("status").filter({ hasText: "Enregistré" })).toBeVisible();
 
   await page.getByRole("link", { name: "Journal" }).click();
   // 60 kg : Dépense de repos 1 580 kcal, qui sert de plancher

@@ -8,6 +8,7 @@ const E2E_ALLOWED_EMAILS = [
   "invite-mobile-safari@exemple.fr",
   "profil-mobile-chrome@exemple.fr",
   "profil-mobile-safari@exemple.fr",
+  "pwa-mobile-chrome@exemple.fr",
 ];
 
 // Runs a production build against a fresh local PGlite folder, migrated with the
