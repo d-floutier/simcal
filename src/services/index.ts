@@ -10,3 +10,14 @@ export {
   type ChampProfil,
   type SaisieProfil,
 } from "./profil";
+export {
+  enregistrerPesee,
+  listerPesees,
+  passerEnMaintien,
+  PeseeInvalide,
+  propositionMaintien,
+  refuserMaintien,
+  supprimerPesee,
+  type ChampPesee,
+  type Pesee,
+} from "./pesees";

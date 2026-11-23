@@ -33,7 +33,7 @@ export type SaisieProfil = {
 
 type LigneParametres = typeof objectifHistorique.$inferSelect;
 
-function versParametres(l: Omit<LigneParametres, "userId" | "depuis">): ParametresObjectif {
+export function versParametres(l: Omit<LigneParametres, "userId" | "depuis">): ParametresObjectif {
   const objectif: Objectif =
     l.sens === "maintenir"
       ? { sens: "maintenir" }
@@ -70,7 +70,7 @@ export async function objectifDuJour(ctx: Contexte, jour: Jour): Promise<Objecti
   return ligne ? calculerObjectif(versParametres(ligne), jour) : null;
 }
 
-function versLigne(p: ParametresObjectif) {
+export function versLigne(p: ParametresObjectif) {
   return {
     sexe: p.sexe,
     dateNaissance: p.dateNaissance,
@@ -108,7 +108,7 @@ export class SaisieProfilInvalide extends Error {
 
 const entre = (x: number, min: number, max: number) => Number.isFinite(x) && x >= min && x <= max;
 
-function dateValide(jour: string): boolean {
+export function dateValide(jour: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(jour)) return false;
   const d = new Date(`${jour}T00:00:00Z`);
   return !Number.isNaN(d.getTime()) && d.toISOString().startsWith(jour);

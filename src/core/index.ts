@@ -1,5 +1,6 @@
 // Noyau nutritionnel : module pur, sans base de données ni framework.
 export { jourCalendaire, type Jour } from "./jour";
+export { ecartPoidsCible, poidsCibleAtteint } from "./poids-cible";
 export { REPAS, type Repas } from "./repas";
 export {
   age,
