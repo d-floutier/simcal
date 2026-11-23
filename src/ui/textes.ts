@@ -342,6 +342,7 @@ export const textes = {
     ajouterVerreLibelle: (verre: string) => `Ajouter un Verre de ${verre}`,
     retirerVerre: "Retirer un Verre",
     nonCompte: "Seuls les Verres comptent : les boissons notées dans le Journal n'y entrent pas.",
+    jourFutur: "Impossible d'ajouter un Verre sur un jour futur.",
     reglages: {
       titre: "Hydratation",
       intro: "Un nouvel Objectif d'hydratation s'applique à partir d'aujourd'hui. La taille du Verre vaut pour les prochains Verres.",

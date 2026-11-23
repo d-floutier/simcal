@@ -20,7 +20,7 @@ export async function ajouterVerreAction(_: EtatVerre, formData: FormData): Prom
   try {
     await ajouterVerre(ctx, String(formData.get("jour") ?? ""));
   } catch (e) {
-    if (e instanceof JourFutur) return { erreur: textes.entree.jourFutur };
+    if (e instanceof JourFutur) return { erreur: textes.hydratation.jourFutur };
     console.error(e);
     return { erreur: textes.erreurs.inattendue };
   }
