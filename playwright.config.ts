@@ -6,6 +6,8 @@ const baseURL = `http://localhost:${PORT}`;
 const E2E_ALLOWED_EMAILS = [
   "invite-mobile-chrome@exemple.fr",
   "invite-mobile-safari@exemple.fr",
+  "profil-mobile-chrome@exemple.fr",
+  "profil-mobile-safari@exemple.fr",
 ];
 
 // Runs a production build against a fresh local PGlite folder, migrated with the

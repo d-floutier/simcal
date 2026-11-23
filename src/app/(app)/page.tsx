@@ -1,24 +1,31 @@
+import Link from "next/link";
+import { ResumeObjectif } from "@/components/resume-objectif";
+import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { jourCalendaire } from "@/core";
-import { getDb } from "@/db";
-import { requireUser } from "@/lib/auth";
-import { FUSEAU_PAR_DEFAUT } from "@/lib/fuseau";
+import { requireProfil } from "@/lib/profil";
 import { lireJournal } from "@/services";
 import { formaterJourLong, textes } from "@/ui/textes";
 
 export default async function JournalPage() {
-  const user = await requireUser();
-  const jour = jourCalendaire(new Date(), FUSEAU_PAR_DEFAUT);
-  const journal = await lireJournal({ db: getDb(), userId: user.id }, jour);
+  const { ctx, profil } = await requireProfil();
+  const jour = jourCalendaire(new Date(), profil.fuseau);
+  const journal = await lireJournal(ctx, jour);
 
   return (
     <div className="flex flex-col gap-4">
-      <div>
-        <h1 className="text-2xl font-semibold">{textes.journal.titre}</h1>
-        <p className="text-sm text-muted-foreground first-letter:uppercase">
-          {textes.journal.aujourdhui} · {formaterJourLong(journal.jour)}
-        </p>
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <h1 className="text-2xl font-semibold">{textes.journal.titre}</h1>
+          <p className="text-sm text-muted-foreground first-letter:uppercase">
+            {textes.journal.aujourdhui} · {formaterJourLong(journal.jour)}
+          </p>
+        </div>
+        <Link href="/reglages" className={buttonVariants({ variant: "outline", size: "sm" })}>
+          {textes.navigation.reglages}
+        </Link>
       </div>
+      <ResumeObjectif objectif={journal.objectif} titre={textes.journal.objectifDuJour} detail={false} />
       {journal.repas.map(({ repas }) => (
         <Card key={repas} size="sm" role="region" aria-labelledby={`repas-${repas}`}>
           <CardHeader>

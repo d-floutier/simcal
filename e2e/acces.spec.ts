@@ -1,11 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-
-const MOT_DE_PASSE = "mot-de-passe-solide";
-
-async function remplir(page: Page, email: string, motDePasse = MOT_DE_PASSE) {
-  await page.getByLabel("Email").fill(email);
-  await page.getByLabel("Mot de passe").fill(motDePasse);
-}
+import { creerCompte, remplirIdentifiants as remplir, remplirPremiereConfiguration } from "./aides";
 
 async function attendreJournalVide(page: Page) {
   await expect(page).toHaveURL("/");
@@ -33,9 +27,9 @@ test("un email non autorisé est refusé avec un message clair", async ({ page }
 test("un invité crée son compte, se déconnecte et se reconnecte", async ({ page, context }, testInfo) => {
   const email = `invite-${testInfo.project.name}@exemple.fr`;
 
-  await page.goto("/inscription");
-  await remplir(page, email);
-  await page.getByRole("button", { name: "Créer mon compte" }).click();
+  await creerCompte(page, email);
+  await remplirPremiereConfiguration(page);
+  await page.getByRole("button", { name: "Enregistrer" }).click();
   await attendreJournalVide(page);
 
   // La session est persistante (cookie daté, pas un cookie de session) : elle survit

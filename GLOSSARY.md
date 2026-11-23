@@ -7,7 +7,7 @@ Simcal est une web app de suivi nutritionnel : l'utilisateur fixe un objectif de
 ### Objectif
 
 **Profil** :
-Les caractéristiques physiques de l'utilisateur (sexe pour le calcul, date de naissance, taille, poids, niveau d'activité) qui servent à estimer ses dépenses.
+Les caractéristiques physiques de l'utilisateur (sexe pour le calcul, date de naissance, taille, poids, niveau d'activité) qui servent à estimer ses dépenses, ainsi que son fuseau horaire, qui fixe le changement de jour.
 _Avoid_ : compte, fiche
 
 **Objectif** :

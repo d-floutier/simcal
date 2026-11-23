@@ -55,6 +55,7 @@ Sur Vercel, sans `DATABASE_URL`, l'app refuse d'ouvrir une base (pas de repli su
 - `src/core` : le noyau nutritionnel, pur (ni base de données ni framework).
 - `src/services` : les services de l'application. Chaque fonction reçoit un `Contexte` `{ db, userId }` et ne lit ou n'écrit que les données de cet utilisateur.
 - `src/lib/auth` : Better Auth (`createAuth` pour les tests, `getAuth`/`requireUser` pour l'app).
+- `src/lib/profil.ts` : `requireProfil()`, à appeler dans chaque page qui dépend du Profil : tant qu'il n'est pas complet, elle redirige vers la première configuration (`/configuration`).
 - `src/ui/textes.ts` : tous les textes de l'interface.
 - `src/app` : les pages. `(public)` pour la connexion et l'inscription, `(app)` pour les pages qui exigent une session.
 - `src/test` : les outils de test (`createTestDb`, `creerUtilisateur`).
