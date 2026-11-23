@@ -2,6 +2,7 @@ import { and, desc, eq, lte } from "drizzle-orm";
 import {
   age,
   calculerObjectif,
+  estJourValide,
   NIVEAUX_ACTIVITE,
   RYTHMES,
   totalRepartition,
@@ -109,12 +110,6 @@ export class SaisieProfilInvalide extends SaisieInvalide<ChampProfil> {
 
 const entre = (x: number, min: number, max: number) => Number.isFinite(x) && x >= min && x <= max;
 
-export function dateValide(jour: string): boolean {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(jour)) return false;
-  const d = new Date(`${jour}T00:00:00Z`);
-  return !Number.isNaN(d.getTime()) && d.toISOString().startsWith(jour);
-}
-
 function fuseauValide(fuseau: string): boolean {
   try {
     new Intl.DateTimeFormat("fr-FR", { timeZone: fuseau });
@@ -127,7 +122,7 @@ function fuseauValide(fuseau: string): boolean {
 function champsInvalides(s: SaisieProfil, jour: Jour): ChampProfil[] {
   const invalides: ChampProfil[] = [];
   if (s.sexe !== "homme" && s.sexe !== "femme") invalides.push("sexe");
-  if (!dateValide(s.dateNaissance) || s.dateNaissance >= jour || age(s.dateNaissance, jour) > 120) {
+  if (!estJourValide(s.dateNaissance) || s.dateNaissance >= jour || age(s.dateNaissance, jour) > 120) {
     invalides.push("dateNaissance");
   }
   if (!entre(s.tailleCm, 50, 272)) invalides.push("tailleCm");

@@ -2,6 +2,7 @@
 // côté serveur. Ils s'étirent à la largeur de l'écran sans déformer le texte ; chaque graphique
 // a un résumé accessible et un tableau des valeurs.
 import type { ReactNode } from "react";
+import { dateUTC } from "@/core";
 import type { Statistiques } from "@/services";
 import { formaterGrammes, formaterJourCourt, formaterKcal, formaterKg, formaterNombre, textes } from "@/ui/textes";
 
@@ -21,10 +22,7 @@ function graduations(min: number, max: number, cible = 4): number[] {
 
 /** Le libellé court d'un jour sur l'axe : « 23 nov. ». */
 function jourAxe(jour: string): string {
-  const [a, m, j] = jour.split("-").map(Number);
-  return new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short", timeZone: "UTC" }).format(
-    new Date(Date.UTC(a, m - 1, j)),
-  );
+  return new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short", timeZone: "UTC" }).format(dateUTC(jour));
 }
 
 function Carte({ id, titre, intro, children }: { id: string; titre: string; intro?: string; children: ReactNode }) {

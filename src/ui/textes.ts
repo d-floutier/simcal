@@ -1,5 +1,5 @@
 // Tous les textes de l'interface, en français, regroupés ici pour une traduction future.
-import type { NiveauActivite, Repas, Rythme, SensObjectif, Sexe } from "@/core";
+import { dateUTC, type NiveauActivite, type Repas, type Rythme, type SensObjectif, type Sexe } from "@/core";
 import type {
   ChampAlimentPersonnalise,
   ChampEntree,
@@ -401,13 +401,12 @@ export const textes = {
 } as const;
 
 export function formaterJourLong(jour: string): string {
-  const [a, m, j] = jour.split("-").map(Number);
   return new Intl.DateTimeFormat("fr-FR", {
     weekday: "long",
     day: "numeric",
     month: "long",
     timeZone: "UTC",
-  }).format(new Date(Date.UTC(a, m - 1, j)));
+  }).format(dateUTC(jour));
 }
 
 /** Les arrondis se font uniquement à l'affichage. */
@@ -448,8 +447,5 @@ export function formaterQuantiteEntree(q: QuantiteEntree): string {
 }
 
 export function formaterJourCourt(jour: string): string {
-  const [a, m, j] = jour.split("-").map(Number);
-  return new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", timeZone: "UTC" }).format(
-    new Date(Date.UTC(a, m - 1, j)),
-  );
+  return new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", timeZone: "UTC" }).format(dateUTC(jour));
 }

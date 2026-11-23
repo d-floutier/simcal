@@ -1,11 +1,14 @@
-import type { Jour } from "./jour";
+import { dateUTC, type Jour } from "./jour";
 
 /** L'âge en années révolues, au jour donné, d'une personne née à la date donnée. */
 export function age(dateNaissance: Jour, jour: Jour): number {
-  const [an, mn, jn] = dateNaissance.split("-").map(Number);
-  const [a, m, j] = jour.split("-").map(Number);
-  const anniversairePasse = m > mn || (m === mn && j >= jn);
-  return a - an - (anniversairePasse ? 0 : 1);
+  const naissance = dateUTC(dateNaissance);
+  const date = dateUTC(jour);
+  const moisNaissance = naissance.getUTCMonth();
+  const mois = date.getUTCMonth();
+  const anniversairePasse =
+    mois > moisNaissance || (mois === moisNaissance && date.getUTCDate() >= naissance.getUTCDate());
+  return date.getUTCFullYear() - naissance.getUTCFullYear() - (anniversairePasse ? 0 : 1);
 }
 
 /** Le sexe pour le calcul : les formules d'estimation des dépenses en dépendent. */
