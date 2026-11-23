@@ -1,4 +1,4 @@
-import { and, desc, eq, gt, gte, lt, lte } from "drizzle-orm";
+import { and, desc, eq, gt, gte, lte } from "drizzle-orm";
 import { jourCalendaire, poidsCibleAtteint, type Jour, type Objectif } from "@/core";
 import { objectifHistorique, pesee, profil } from "@/db/schema";
 import type { Contexte, Transaction as Tx } from "./contexte";
@@ -105,9 +105,18 @@ export async function noterPesee(tx: Tx, userId: string, saisie: Pesee): Promise
   if (recente?.jour === saisie.jour) await appliquerPoids(tx, userId, saisie.jour, saisie.poidsKg);
 }
 
+/** Refus de supprimer la seule Pesée restante : le Profil a toujours besoin d'un poids. */
+export class DernierePesee extends Error {
+  constructor() {
+    super("La dernière Pesée restante ne peut pas être supprimée.");
+    this.name = "DernierePesee";
+  }
+}
+
 /**
  * Supprime la Pesée du jour donné. Si c'était la plus récente, la précédente reprend son rôle
- * à partir de ce jour ; sans précédente, c'est le poids de l'objectif en vigueur la veille.
+ * à partir de ce jour. La seule Pesée restante ne se supprime pas (`DernierePesee`) : le poids
+ * du Profil est toujours celui d'une Pesée.
  */
 export async function supprimerPesee(ctx: Contexte, jour: Jour): Promise<void> {
   await ctx.db.transaction(async (tx) => {
@@ -116,20 +125,12 @@ export async function supprimerPesee(ctx: Contexte, jour: Jour): Promise<void> {
       .delete(pesee)
       .where(and(eq(pesee.userId, ctx.userId), eq(pesee.jour, jour)))
       .returning({ jour: pesee.jour });
-    if (supprimees.length === 0 || avant?.jour !== jour) return;
+    if (supprimees.length === 0) return;
 
     const precedente = await plusRecente(tx, ctx.userId);
-    let poidsKg = precedente?.poidsKg;
-    if (poidsKg === undefined) {
-      const [veille] = await tx
-        .select({ poidsKg: objectifHistorique.poidsKg })
-        .from(objectifHistorique)
-        .where(and(eq(objectifHistorique.userId, ctx.userId), lt(objectifHistorique.depuis, jour)))
-        .orderBy(desc(objectifHistorique.depuis))
-        .limit(1);
-      poidsKg = veille?.poidsKg;
-    }
-    if (poidsKg !== undefined) await appliquerPoids(tx, ctx.userId, jour, poidsKg);
+    // Lever l'erreur annule la transaction, donc la suppression.
+    if (!precedente) throw new DernierePesee();
+    if (avant?.jour === jour) await appliquerPoids(tx, ctx.userId, jour, precedente.poidsKg);
   });
 }
 

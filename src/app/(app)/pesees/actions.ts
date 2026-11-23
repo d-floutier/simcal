@@ -3,6 +3,7 @@
 import { refresh } from "next/cache";
 import { requireContexte } from "@/lib/profil";
 import {
+  DernierePesee,
   enregistrerPesee,
   passerEnMaintien,
   PeseeInvalide,
@@ -33,7 +34,12 @@ export async function enregistrerPeseeAction(_: EtatPesee, formData: FormData): 
 
 export async function supprimerPeseeAction(formData: FormData): Promise<void> {
   const ctx = await requireContexte();
-  await supprimerPesee(ctx, String(formData.get("jour") ?? ""));
+  try {
+    await supprimerPesee(ctx, String(formData.get("jour") ?? ""));
+  } catch (e) {
+    // La page ne propose pas de supprimer la seule Pesée : rien à afficher de plus.
+    if (!(e instanceof DernierePesee)) throw e;
+  }
   refresh();
 }
 

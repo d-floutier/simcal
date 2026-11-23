@@ -321,6 +321,7 @@ export const textes = {
     modifier: "Modifier",
     supprimer: "Supprimer",
     supprimerLibelle: (jour: string) => `Supprimer la Pesée du ${jour}`,
+    derniereNonSupprimable: "Votre seule Pesée ne peut pas être supprimée : votre Profil a besoin d'un poids.",
     modifierLibelle: (jour: string) => `Modifier la Pesée du ${jour}`,
     erreurs: {
       jour: "Choisissez aujourd'hui ou un jour passé.",

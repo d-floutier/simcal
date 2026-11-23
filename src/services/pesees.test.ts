@@ -8,6 +8,7 @@ import {
   lireProfil,
   objectifDuJour,
   passerEnMaintien,
+  DernierePesee,
   PeseeInvalide,
   propositionMaintien,
   refuserMaintien,
@@ -147,6 +148,22 @@ describe("Pesées", () => {
 
     expect((await lireProfil(ctx))?.poidsKg).toBe(80);
     expect(await kcal(ctx, "2026-11-23")).toBeCloseTo(2209, 9);
+  });
+
+  it("refuse de supprimer la dernière Pesée restante : le Profil a besoin d'un poids", async () => {
+    await expect(supprimerPesee(ctx, "2026-11-01")).rejects.toEqual(new DernierePesee());
+
+    expect(await listerPesees(ctx)).toEqual([INITIALE]);
+    expect((await lireProfil(ctx))?.poidsKg).toBe(80);
+  });
+
+  it("supprimer la plus ancienne Pesée, quand il en reste d'autres, ne change pas le Profil", async () => {
+    await enregistrerPesee(ctx, { jour: "2026-11-20", poidsKg: 78 }, AUJOURDHUI);
+
+    await supprimerPesee(ctx, "2026-11-01");
+
+    expect(await listerPesees(ctx)).toEqual([{ jour: "2026-11-20", poidsKg: 78 }]);
+    expect((await lireProfil(ctx))?.poidsKg).toBe(78);
   });
 
   it("les Pesées d'un autre utilisateur restent invisibles", async () => {

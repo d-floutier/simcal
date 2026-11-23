@@ -40,6 +40,7 @@ export {
 } from "./aliments";
 export { lireRecents, NOMBRE_RECENTS, type Recent } from "./recents";
 export {
+  DernierePesee,
   enregistrerPesee,
   listerPesees,
   passerEnMaintien,

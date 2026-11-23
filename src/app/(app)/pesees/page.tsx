@@ -80,12 +80,17 @@ export default async function PeseesPage({ searchParams }: PageProps<"/pesees">)
                   >
                     {t.modifier}
                   </Link>
-                  <BoutonSupprimerPesee jour={p.jour} libelle={t.supprimerLibelle(date)} />
+                  {pesees.length > 1 ? (
+                    <BoutonSupprimerPesee jour={p.jour} libelle={t.supprimerLibelle(date)} />
+                  ) : (
+                    <span />
+                  )}
                 </li>
               );
             })}
           </ul>
         )}
+        {pesees.length === 1 && <p className="text-sm text-muted-foreground">{t.derniereNonSupprimable}</p>}
       </section>
     </div>
   );
