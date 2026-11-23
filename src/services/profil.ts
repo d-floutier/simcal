@@ -16,6 +16,7 @@ import {
   type Sexe,
 } from "@/core";
 import { objectifHistorique, profil } from "@/db/schema";
+import { SaisieInvalide } from "./saisie-invalide";
 import type { Contexte } from "./contexte";
 // Import circulaire sans risque : noterPesee n'est appelée qu'à l'exécution.
 import { noterPesee } from "./pesees";
@@ -100,11 +101,9 @@ export type ChampProfil =
   | "rythme"
   | "repartition";
 
-/** La saisie est refusée : `champs` liste les champs invalides, dans l'ordre du formulaire. */
-export class SaisieProfilInvalide extends Error {
-  constructor(readonly champs: ChampProfil[]) {
-    super(`Profil invalide : ${champs.join(", ")}`);
-    this.name = "SaisieProfilInvalide";
+export class SaisieProfilInvalide extends SaisieInvalide<ChampProfil> {
+  constructor(champs: ChampProfil[]) {
+    super("Profil", champs);
   }
 }
 

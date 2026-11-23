@@ -16,6 +16,7 @@ import {
 } from "@/core";
 import { entree as tableEntree, portion as tablePortion, profil } from "@/db/schema";
 import { estUuid, lireAliment } from "./aliments";
+import { SaisieInvalide } from "./saisie-invalide";
 import type { Contexte } from "./contexte";
 import { objectifDuJour } from "./profil";
 
@@ -62,11 +63,9 @@ export type JournalDuJour = {
 
 export type ChampEntree = "jour" | "repas" | "aliment" | "quantite";
 
-/** La saisie d'une Entrée est refusée : `champs` liste les champs invalides. */
-export class SaisieEntreeInvalide extends Error {
-  constructor(readonly champs: ChampEntree[]) {
-    super(`Entrée invalide : ${champs.join(", ")}`);
-    this.name = "SaisieEntreeInvalide";
+export class SaisieEntreeInvalide extends SaisieInvalide<ChampEntree> {
+  constructor(champs: ChampEntree[]) {
+    super("Entrée", champs);
   }
 }
 

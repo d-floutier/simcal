@@ -6,7 +6,7 @@ import {
   DernierePesee,
   enregistrerPesee,
   passerEnMaintien,
-  PeseeInvalide,
+  SaisiePeseeInvalide,
   refuserMaintien,
   supprimerPesee,
   type ChampPesee,
@@ -24,7 +24,7 @@ export async function enregistrerPeseeAction(_: EtatPesee, formData: FormData): 
       poidsKg: brut === "" ? Number.NaN : Number(brut),
     });
   } catch (e) {
-    if (e instanceof PeseeInvalide) return { erreurs: e.champs };
+    if (e instanceof SaisiePeseeInvalide) return { erreurs: e.champs };
     console.error(e);
     return { erreur: textes.erreurs.inattendue };
   }

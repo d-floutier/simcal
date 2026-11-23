@@ -2,6 +2,7 @@ import { and, asc, eq, inArray } from "drizzle-orm";
 import { NUTRIMENTS_FACULTATIFS, normaliserRecherche, type Macros, type NutrimentsFacultatifs } from "@/core";
 import { aliment, portion, type UniteAliment } from "@/db/schema";
 import { estUuid, fichesAliments, type FicheAliment, type Portion } from "./aliments";
+import { SaisieInvalide } from "./saisie-invalide";
 import type { Contexte } from "./contexte";
 
 /**
@@ -20,11 +21,9 @@ const MACROS = ["kcal", "proteines", "glucides", "lipides"] as const;
 
 export type ChampAlimentPersonnalise = "nom" | "unite" | "codeBarres" | keyof Macros | keyof NutrimentsFacultatifs;
 
-/** La saisie d'un Aliment personnalisé est refusée : `champs` liste les champs invalides. */
-export class SaisieAlimentInvalide extends Error {
-  constructor(readonly champs: ChampAlimentPersonnalise[]) {
-    super(`Aliment personnalisé invalide : ${champs.join(", ")}`);
-    this.name = "SaisieAlimentInvalide";
+export class SaisieAlimentInvalide extends SaisieInvalide<ChampAlimentPersonnalise> {
+  constructor(champs: ChampAlimentPersonnalise[]) {
+    super("Aliment personnalisé", champs);
   }
 }
 
@@ -129,10 +128,9 @@ export async function supprimerAlimentPersonnalise(ctx: Contexte, id: string): P
 export type SaisiePortion = { nom: string; grammes: number };
 export type ChampPortion = keyof SaisiePortion;
 
-export class SaisiePortionInvalide extends Error {
-  constructor(readonly champs: ChampPortion[]) {
-    super(`Portion invalide : ${champs.join(", ")}`);
-    this.name = "SaisiePortionInvalide";
+export class SaisiePortionInvalide extends SaisieInvalide<ChampPortion> {
+  constructor(champs: ChampPortion[]) {
+    super("Portion", champs);
   }
 }
 

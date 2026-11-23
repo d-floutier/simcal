@@ -6,7 +6,7 @@ import {
   ajouterVerre,
   JourFutur,
   modifierReglagesHydratation,
-  ReglagesHydratationInvalides,
+  SaisieHydratationInvalide,
   retirerVerre,
   type ChampHydratation,
 } from "@/services";
@@ -57,7 +57,7 @@ export async function modifierReglagesHydratationAction(
       verreMl: lireMl(formData.get("verreMl")),
     });
   } catch (e) {
-    if (e instanceof ReglagesHydratationInvalides) return { erreurs: e.champs };
+    if (e instanceof SaisieHydratationInvalide) return { erreurs: e.champs };
     console.error(e);
     return { erreur: textes.erreurs.inattendue };
   }

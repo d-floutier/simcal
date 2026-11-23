@@ -1,6 +1,7 @@
 import { and, desc, eq, gt, gte, lte } from "drizzle-orm";
 import { jourCalendaire, poidsCibleAtteint, type Jour, type Objectif } from "@/core";
 import { objectifHistorique, pesee, profil } from "@/db/schema";
+import { SaisieInvalide } from "./saisie-invalide";
 import type { Contexte, Transaction as Tx } from "./contexte";
 import { dateValide, enregistrerProfil, lireProfil, versLigne, versParametres } from "./profil";
 
@@ -8,11 +9,10 @@ export type Pesee = { jour: Jour; poidsKg: number };
 
 export type ChampPesee = "jour" | "poidsKg";
 
-/** La saisie est refusée : `champs` liste les champs invalides (jour futur ou illisible, poids hors bornes). */
-export class PeseeInvalide extends Error {
-  constructor(readonly champs: ChampPesee[]) {
-    super(`Pesée invalide : ${champs.join(", ")}`);
-    this.name = "PeseeInvalide";
+/** Une Pesée refusée : jour futur ou illisible, poids hors bornes. */
+export class SaisiePeseeInvalide extends SaisieInvalide<ChampPesee> {
+  constructor(champs: ChampPesee[]) {
+    super("Pesée", champs);
   }
 }
 
@@ -87,7 +87,7 @@ export async function enregistrerPesee(ctx: Contexte, saisie: Pesee, instant: Da
     const invalides: ChampPesee[] = [];
     if (!dateValide(saisie.jour) || saisie.jour > aujourdhui) invalides.push("jour");
     if (!(Number.isFinite(saisie.poidsKg) && saisie.poidsKg >= 20 && saisie.poidsKg <= 500)) invalides.push("poidsKg");
-    if (invalides.length > 0) throw new PeseeInvalide(invalides);
+    if (invalides.length > 0) throw new SaisiePeseeInvalide(invalides);
     await noterPesee(tx, ctx.userId, saisie);
   });
 }

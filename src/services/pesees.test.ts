@@ -9,7 +9,7 @@ import {
   objectifDuJour,
   passerEnMaintien,
   DernierePesee,
-  PeseeInvalide,
+  SaisiePeseeInvalide,
   propositionMaintien,
   refuserMaintien,
   supprimerPesee,
@@ -68,7 +68,7 @@ describe("Pesées", () => {
     // 23 h 30 à Paris le 23 : le 24 est encore demain.
     const soir = new Date("2026-11-23T22:30:00Z");
     await expect(enregistrerPesee(ctx, { jour: "2026-11-24", poidsKg: 79 }, soir)).rejects.toEqual(
-      new PeseeInvalide(["jour"]),
+      new SaisiePeseeInvalide(["jour"]),
     );
     // 0 h 30 à Paris le 24 : c'est aujourd'hui.
     const minuit = new Date("2026-11-23T23:30:00Z");
@@ -78,10 +78,10 @@ describe("Pesées", () => {
 
   it("refuse un poids ou un jour illisible", async () => {
     await expect(enregistrerPesee(ctx, { jour: "2026-02-30", poidsKg: Number.NaN }, AUJOURDHUI)).rejects.toEqual(
-      new PeseeInvalide(["jour", "poidsKg"]),
+      new SaisiePeseeInvalide(["jour", "poidsKg"]),
     );
     await expect(enregistrerPesee(ctx, { jour: "2026-11-23", poidsKg: 5 }, AUJOURDHUI)).rejects.toEqual(
-      new PeseeInvalide(["poidsKg"]),
+      new SaisiePeseeInvalide(["poidsKg"]),
     );
     expect(await listerPesees(ctx)).toEqual([INITIALE]);
   });

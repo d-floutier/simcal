@@ -13,7 +13,7 @@ import {
   lireHydratation,
   lireReglagesHydratation,
   modifierReglagesHydratation,
-  ReglagesHydratationInvalides,
+  SaisieHydratationInvalide,
   retirerVerre,
   type Contexte,
   type SaisieProfil,
@@ -112,7 +112,7 @@ describe("Hydratation", () => {
   it("refuse un Objectif d'hydratation ou une taille de Verre hors bornes, sans rien changer", async () => {
     const essai = modifierReglagesHydratation(ctx, { objectifMl: 0, verreMl: 12.5 }, midi(AUJOURDHUI));
 
-    await expect(essai).rejects.toEqual(new ReglagesHydratationInvalides(["objectifMl", "verreMl"]));
+    await expect(essai).rejects.toEqual(new SaisieHydratationInvalide(["objectifMl", "verreMl"]));
     expect(await lireReglagesHydratation(ctx)).toEqual({ objectifMl: 2000, verreMl: 250 });
   });
 

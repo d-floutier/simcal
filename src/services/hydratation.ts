@@ -1,6 +1,7 @@
 import { and, asc, desc, eq, gt, lte, sql } from "drizzle-orm";
 import { estJourValide, jourCalendaire, type Jour } from "@/core";
 import { ajoutHydratation, objectifHistorique, profil } from "@/db/schema";
+import { SaisieInvalide } from "./saisie-invalide";
 import type { Contexte } from "./contexte";
 import { JourFutur } from "./journal";
 import { versLigne, versParametres } from "./profil";
@@ -97,11 +98,9 @@ export type ReglagesHydratation = { objectifMl: number; verreMl: number };
 
 export type ChampHydratation = keyof ReglagesHydratation;
 
-/** Les réglages sont refusés : `champs` liste les champs invalides. */
-export class ReglagesHydratationInvalides extends Error {
-  constructor(readonly champs: ChampHydratation[]) {
-    super(`Réglages d'hydratation invalides : ${champs.join(", ")}`);
-    this.name = "ReglagesHydratationInvalides";
+export class SaisieHydratationInvalide extends SaisieInvalide<ChampHydratation> {
+  constructor(champs: ChampHydratation[]) {
+    super("Réglages d'hydratation", champs);
   }
 }
 
@@ -130,7 +129,7 @@ export async function modifierReglagesHydratation(
     const x = reglages[c];
     return !(Number.isInteger(x) && x >= BORNES_HYDRATATION[c].min && x <= BORNES_HYDRATATION[c].max);
   });
-  if (invalides.length > 0) throw new ReglagesHydratationInvalides(invalides);
+  if (invalides.length > 0) throw new SaisieHydratationInvalide(invalides);
   const { objectifMl, verreMl } = reglages;
 
   await ctx.db.transaction(async (tx) => {
