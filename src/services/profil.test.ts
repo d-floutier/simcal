@@ -2,7 +2,9 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { createTestDb } from "@/test/db";
 import { creerUtilisateur } from "@/test/utilisateurs";
 import {
+  enregistrerPesee,
   enregistrerProfil,
+  listerPesees,
   lireProfil,
   objectifDuJour,
   SaisieProfilInvalide,
@@ -82,6 +84,35 @@ describe("Profil et Objectif", () => {
 
     expect((await objectifDuJour(ctx, "2026-11-23"))?.kcal).toBeCloseTo(2364, 9);
     expect(await lireProfil(ctx)).toMatchObject({ poidsKg: 90 });
+  });
+
+  it("la première configuration note le poids saisi comme Pesée du jour", async () => {
+    await enregistrerProfil(ctx, SAISIE, midi("2026-11-20"));
+
+    expect(await listerPesees(ctx)).toEqual([{ jour: "2026-11-20", poidsKg: 80 }]);
+  });
+
+  it("changer le poids dans le Profil note une Pesée du jour, qui devient la plus récente", async () => {
+    await enregistrerProfil(ctx, SAISIE, midi("2026-11-20"));
+    await enregistrerPesee(ctx, { jour: "2026-11-21", poidsKg: 79 }, midi("2026-11-21"));
+    await enregistrerProfil(ctx, { ...SAISIE, poidsKg: 78 }, midi("2026-11-23"));
+
+    expect(await listerPesees(ctx)).toEqual([
+      { jour: "2026-11-23", poidsKg: 78 },
+      { jour: "2026-11-21", poidsKg: 79 },
+      { jour: "2026-11-20", poidsKg: 80 },
+    ]);
+    expect(await lireProfil(ctx)).toMatchObject({ poidsKg: 78 });
+    // 78 kg : 2 178 kcal à partir du 23 ; les jours passés gardent le leur.
+    expect((await objectifDuJour(ctx, "2026-11-22"))?.kcal).toBeCloseTo(2193.5, 9);
+    expect((await objectifDuJour(ctx, "2026-11-23"))?.kcal).toBeCloseTo(2178, 9);
+  });
+
+  it("enregistrer le Profil sans changer le poids ne note pas de Pesée", async () => {
+    await enregistrerProfil(ctx, SAISIE, midi("2026-11-20"));
+    await enregistrerProfil(ctx, { ...SAISIE, objectif: { sens: "maintenir" } }, midi("2026-11-23"));
+
+    expect(await listerPesees(ctx)).toEqual([{ jour: "2026-11-20", poidsKg: 80 }]);
   });
 
   it("« aujourd'hui » suit le fuseau du Profil", async () => {

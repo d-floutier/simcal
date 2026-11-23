@@ -17,6 +17,8 @@ import {
 } from "@/core";
 import { objectifHistorique, profil } from "@/db/schema";
 import type { Contexte } from "./contexte";
+// Import circulaire sans risque : noterPesee n'est appelée qu'à l'exécution.
+import { noterPesee } from "./pesees";
 
 /** Le Profil, l'Objectif et la Répartition des macros, tels que saisis dans les réglages. */
 export type SaisieProfil = {
@@ -149,7 +151,9 @@ function champsInvalides(s: SaisieProfil, jour: Jour): ChampProfil[] {
 
 /**
  * Enregistre le Profil, l'Objectif et la Répartition, et un nouvel objectif valable à partir
- * d'aujourd'hui (dans le fuseau saisi). Les jours passés gardent le leur.
+ * d'aujourd'hui (dans le fuseau saisi). Les jours passés gardent le leur. Le poids du Profil est
+ * toujours celui de la Pesée la plus récente : à la première configuration, ou quand le poids
+ * change, il est noté comme Pesée d'aujourd'hui.
  */
 export async function enregistrerProfil(
   ctx: Contexte,
@@ -165,7 +169,7 @@ export async function enregistrerProfil(
   await ctx.db.transaction(async (tx) => {
     // L'Objectif d'hydratation n'est pas saisi ici : la nouvelle ligne d'historique reporte le courant.
     const [courant] = await tx
-      .select({ objectifHydratationMl: profil.objectifHydratationMl })
+      .select({ objectifHydratationMl: profil.objectifHydratationMl, poidsKg: profil.poidsKg })
       .from(profil)
       .where(eq(profil.userId, ctx.userId));
     await tx
@@ -174,8 +178,9 @@ export async function enregistrerProfil(
       .onConflictDoUpdate({ target: profil.userId, set: { fuseau, ...ligne, misAJour: new Date() } });
     await tx
       .insert(objectifHistorique)
-      .values({ userId: ctx.userId, depuis: jour, ...ligne, ...courant })
+      .values({ userId: ctx.userId, depuis: jour, ...ligne, objectifHydratationMl: courant?.objectifHydratationMl })
       .onConflictDoUpdate({ target: [objectifHistorique.userId, objectifHistorique.depuis], set: ligne });
+    if (courant?.poidsKg !== ligne.poidsKg) await noterPesee(tx, ctx.userId, { jour, poidsKg: ligne.poidsKg });
   });
   return { jour, objectif };
 }

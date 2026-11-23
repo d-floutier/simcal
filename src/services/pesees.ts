@@ -1,7 +1,7 @@
 import { and, desc, eq, gt, gte, lt, lte } from "drizzle-orm";
 import { jourCalendaire, poidsCibleAtteint, type Jour, type Objectif } from "@/core";
 import { objectifHistorique, pesee, profil } from "@/db/schema";
-import type { Contexte } from "./contexte";
+import type { Contexte, Transaction as Tx } from "./contexte";
 import { dateValide, enregistrerProfil, lireProfil, versLigne, versParametres } from "./profil";
 
 export type Pesee = { jour: Jour; poidsKg: number };
@@ -30,8 +30,6 @@ export async function listerPesees(ctx: Contexte, periode: { du?: Jour; au?: Jou
     )
     .orderBy(desc(pesee.jour));
 }
-
-type Tx = Parameters<Parameters<Contexte["db"]["transaction"]>[0]>[0];
 
 async function plusRecente(tx: Tx, userId: string): Promise<Pesee | undefined> {
   const [p] = await tx
@@ -90,14 +88,21 @@ export async function enregistrerPesee(ctx: Contexte, saisie: Pesee, instant: Da
     if (!dateValide(saisie.jour) || saisie.jour > aujourdhui) invalides.push("jour");
     if (!(Number.isFinite(saisie.poidsKg) && saisie.poidsKg >= 20 && saisie.poidsKg <= 500)) invalides.push("poidsKg");
     if (invalides.length > 0) throw new PeseeInvalide(invalides);
-
-    await tx
-      .insert(pesee)
-      .values({ userId: ctx.userId, jour: saisie.jour, poidsKg: saisie.poidsKg })
-      .onConflictDoUpdate({ target: [pesee.userId, pesee.jour], set: { poidsKg: saisie.poidsKg } });
-    const recente = await plusRecente(tx, ctx.userId);
-    if (recente?.jour === saisie.jour) await appliquerPoids(tx, ctx.userId, saisie.jour, saisie.poidsKg);
+    await noterPesee(tx, ctx.userId, saisie);
   });
+}
+
+/**
+ * Note une Pesée déjà validée dans la transaction donnée, en remplaçant celle du même jour.
+ * Si c'est la plus récente, elle devient le poids du Profil et fixe l'objectif à partir de son jour.
+ */
+export async function noterPesee(tx: Tx, userId: string, saisie: Pesee): Promise<void> {
+  await tx
+    .insert(pesee)
+    .values({ userId, jour: saisie.jour, poidsKg: saisie.poidsKg })
+    .onConflictDoUpdate({ target: [pesee.userId, pesee.jour], set: { poidsKg: saisie.poidsKg } });
+  const recente = await plusRecente(tx, userId);
+  if (recente?.jour === saisie.jour) await appliquerPoids(tx, userId, saisie.jour, saisie.poidsKg);
 }
 
 /**

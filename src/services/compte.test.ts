@@ -78,7 +78,11 @@ describe("Export des données", () => {
       nom: "1 bol",
       grammesParPortion: 300,
     });
-    expect(donnees.pesees).toEqual([{ jour: "2026-11-21", poidsKg: 67.4 }]);
+    // La première configuration (le 20) note le poids saisi comme Pesée.
+    expect(donnees.pesees).toEqual([
+      { jour: "2026-11-20", poidsKg: 68 },
+      { jour: "2026-11-21", poidsKg: 67.4 },
+    ]);
     expect(donnees.hydratation.map((a) => [a.jour, a.ml])).toEqual([
       ["2026-11-22", 300],
       ["2026-11-22", 300],

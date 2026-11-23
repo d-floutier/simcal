@@ -32,6 +32,8 @@ const SAISIE: SaisieProfil = {
 /** Midi à Paris, le jour donné. */
 const midi = (jour: string) => new Date(`${jour}T11:00:00Z`);
 const AUJOURDHUI = midi("2026-11-23");
+/** La Pesée notée par la première configuration. */
+const INITIALE = { jour: "2026-11-01", poidsKg: 80 };
 const kcal = async (ctx: Contexte, jour: string) => (await objectifDuJour(ctx, jour))?.kcal;
 
 describe("Pesées", () => {
@@ -49,6 +51,7 @@ describe("Pesées", () => {
     expect(await listerPesees(ctx)).toEqual([
       { jour: "2026-11-23", poidsKg: 79 },
       { jour: "2026-11-20", poidsKg: 79.4 },
+      INITIALE,
     ]);
   });
 
@@ -56,7 +59,7 @@ describe("Pesées", () => {
     await enregistrerPesee(ctx, { jour: "2026-11-23", poidsKg: 79 }, AUJOURDHUI);
     await enregistrerPesee(ctx, { jour: "2026-11-23", poidsKg: 78.6 }, AUJOURDHUI);
 
-    expect(await listerPesees(ctx)).toEqual([{ jour: "2026-11-23", poidsKg: 78.6 }]);
+    expect(await listerPesees(ctx)).toEqual([{ jour: "2026-11-23", poidsKg: 78.6 }, INITIALE]);
     expect((await lireProfil(ctx))?.poidsKg).toBe(78.6);
   });
 
@@ -69,7 +72,7 @@ describe("Pesées", () => {
     // 0 h 30 à Paris le 24 : c'est aujourd'hui.
     const minuit = new Date("2026-11-23T23:30:00Z");
     await enregistrerPesee(ctx, { jour: "2026-11-24", poidsKg: 79 }, minuit);
-    expect(await listerPesees(ctx)).toHaveLength(1);
+    expect(await listerPesees(ctx)).toHaveLength(2);
   });
 
   it("refuse un poids ou un jour illisible", async () => {
@@ -79,7 +82,7 @@ describe("Pesées", () => {
     await expect(enregistrerPesee(ctx, { jour: "2026-11-23", poidsKg: 5 }, AUJOURDHUI)).rejects.toEqual(
       new PeseeInvalide(["poidsKg"]),
     );
-    expect(await listerPesees(ctx)).toEqual([]);
+    expect(await listerPesees(ctx)).toEqual([INITIALE]);
   });
 
   it("la Pesée la plus récente devient le poids du Profil et fixe l'objectif à partir de son jour", async () => {
@@ -119,7 +122,7 @@ describe("Pesées", () => {
 
     await supprimerPesee(ctx, "2026-11-20");
 
-    expect(await listerPesees(ctx)).toEqual([{ jour: "2026-11-15", poidsKg: 79 }]);
+    expect(await listerPesees(ctx)).toEqual([{ jour: "2026-11-15", poidsKg: 79 }, INITIALE]);
     expect((await lireProfil(ctx))?.poidsKg).toBe(79);
     expect(await kcal(ctx, "2026-11-14")).toBeCloseTo(2209, 9);
     expect(await kcal(ctx, "2026-11-15")).toBeCloseTo(2193.5, 9);
@@ -137,7 +140,7 @@ describe("Pesées", () => {
     expect(await kcal(ctx, "2026-11-23")).toBeCloseTo(2178, 9);
   });
 
-  it("supprimer la seule Pesée rend au Profil le poids saisi avant elle", async () => {
+  it("supprimer la seule Pesée après la première configuration rend au Profil le poids configuré", async () => {
     await enregistrerPesee(ctx, { jour: "2026-11-20", poidsKg: 78 }, AUJOURDHUI);
 
     await supprimerPesee(ctx, "2026-11-20");
@@ -151,9 +154,9 @@ describe("Pesées", () => {
     const autre = { db: ctx.db, userId: await creerUtilisateur(ctx.db, "autre@exemple.fr") };
     await enregistrerProfil(autre, SAISIE, AUJOURDHUI);
 
-    expect(await listerPesees(autre)).toEqual([]);
+    expect(await listerPesees(autre)).toEqual([{ jour: "2026-11-23", poidsKg: 80 }]);
     await supprimerPesee(autre, "2026-11-20");
-    expect(await listerPesees(ctx)).toHaveLength(1);
+    expect(await listerPesees(ctx)).toHaveLength(2);
   });
 });
 
