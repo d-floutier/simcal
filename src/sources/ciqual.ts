@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { and, desc, eq, sql, type SQL } from "drizzle-orm";
 import { normaliserRecherche, type ValeursNutritionnelles } from "@/core";
 import type { Db } from "@/db/client";
+import { recherchePleinTexte } from "@/db/plein-texte";
 import { aliment } from "@/db/schema";
 import { lireCsv } from "./csv";
 import type { AlimentResume, SourceAliments } from "./source";
@@ -62,12 +63,6 @@ export async function importerAlimentsGeneriques(db: Db, aliments: AlimentGeneri
   return aliments.length;
 }
 
-/** La requête plein texte : chaque mot, au début d'un mot du nom (« pom » trouve « pomme »). */
-export function requetePleinTexte(texte: string): string | null {
-  const mots = normaliserRecherche(texte).split(" ").filter(Boolean);
-  return mots.length === 0 ? null : mots.map((m) => `${m}:*`).join(" & ");
-}
-
 export const LIMITE_RESULTATS = 30;
 
 /**
@@ -75,10 +70,8 @@ export const LIMITE_RESULTATS = 30;
  * noms qui commencent par la recherche, puis par pertinence, puis les noms les plus courts.
  */
 export async function chercherEnBase(db: Db, texte: string, filtre: SQL | undefined): Promise<AlimentResume[]> {
-  const requete = requetePleinTexte(texte);
-  if (!requete) return [];
-  const tsquery = sql`to_tsquery('french', ${requete})`;
-  const vecteur = sql`to_tsvector('french', ${aliment.nomRecherche})`;
+  const recherche = recherchePleinTexte(texte);
+  if (!recherche) return [];
   const debut = normaliserRecherche(texte);
   return db
     .select({
@@ -90,10 +83,10 @@ export async function chercherEnBase(db: Db, texte: string, filtre: SQL | undefi
       unite: aliment.unite,
     })
     .from(aliment)
-    .where(and(filtre, sql`${vecteur} @@ ${tsquery}`))
+    .where(and(filtre, recherche.correspond))
     .orderBy(
       desc(sql`${aliment.nomRecherche} like ${debut + "%"}`),
-      desc(sql`ts_rank(${vecteur}, ${tsquery})`),
+      desc(recherche.pertinence),
       sql`length(${aliment.nom})`,
       aliment.nom,
     )

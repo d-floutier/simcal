@@ -1,6 +1,6 @@
-import { and, desc, eq, isNotNull, sql } from "drizzle-orm";
+import { and, desc, eq, isNotNull } from "drizzle-orm";
+import { recherchePleinTexte } from "@/db/plein-texte";
 import { aliment, entree } from "@/db/schema";
-import { requetePleinTexte } from "@/sources/ciqual";
 import type { AlimentResume } from "@/sources/source";
 import type { Contexte } from "./contexte";
 import { versEntree, type QuantiteEntree } from "./journal";
@@ -16,8 +16,8 @@ export const NOMBRE_RECENTS = 20;
  * n'en fait plus partie. Avec `texte`, seuls ceux de ces 20 Récents qui correspondent à la recherche.
  */
 export async function lireRecents(ctx: Contexte, texte?: string): Promise<Recent[]> {
-  const requete = texte === undefined ? null : requetePleinTexte(texte);
-  if (texte !== undefined && !requete) return [];
+  const recherche = texte === undefined ? null : recherchePleinTexte(texte);
+  if (texte !== undefined && !recherche) return [];
 
   const derniere = ctx.db
     .selectDistinctOn([entree.alimentId])
@@ -38,11 +38,7 @@ export async function lireRecents(ctx: Contexte, texte?: string): Promise<Recent
     .select({ entree: recents._.selectedFields, aliment })
     .from(recents)
     .innerJoin(aliment, eq(aliment.id, recents.alimentId))
-    .where(
-      requete
-        ? sql`to_tsvector('french', ${aliment.nomRecherche}) @@ to_tsquery('french', ${requete})`
-        : undefined,
-    )
+    .where(recherche?.correspond)
     .orderBy(desc(recents.creeLe), desc(recents.id));
 
   return lignes.map(({ entree: e, aliment: a }) => ({
