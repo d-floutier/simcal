@@ -32,6 +32,7 @@ export {
   type FicheAliment,
   type SourceAliments,
 } from "./aliments";
+export { lireRecents, NOMBRE_RECENTS, type Recent } from "./recents";
 export {
   enregistrerPesee,
   listerPesees,

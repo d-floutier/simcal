@@ -77,6 +77,8 @@ export const textes = {
     placeholder: "Ex. : pomme, riz blanc cuit, crème…",
     aucunResultat: "Aucun aliment trouvé.",
     resultats: "Résultats",
+    recents: "Récents",
+    aucunRecent: "Les aliments que vous notez apparaîtront ici.",
     kcalPour100: (kcal: string, unite: "g" | "ml") => `${kcal} pour 100 ${unite}`,
   },
   aliment: {
