@@ -38,3 +38,4 @@ export {
   type ValeursNutritionnelles,
 } from "./entree";
 export { normaliserRecherche } from "./recherche";
+export { joursDeLaPeriode, moyenneMacros, totauxParJour } from "./statistiques";
