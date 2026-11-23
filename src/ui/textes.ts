@@ -373,7 +373,7 @@ export const textes = {
     macrosIntro: (jours: number) =>
       jours === 0
         ? "Aucun jour avec Entrée sur la période."
-        : `Moyenne sur ${jours} jour${jours > 1 ? "s" : ""} avec Entrée, comparée à vos cibles d'aujourd'hui.`,
+        : `Moyenne sur ${jours} jour${jours > 1 ? "s" : ""} avec Entrée, comparée à vos cibles moyennes de ces jours-là.`,
     moyenne: "Moyenne",
     cible: "Cible",
     kcal: "Kcal",

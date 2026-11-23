@@ -31,7 +31,10 @@ export type Statistiques = {
   joursAvecEntree: number;
   /** La moyenne des kcal et Macros sur les seuls jours avec Entrée (null sans aucun). */
   moyenne: Macros | null;
-  /** L'Objectif calorique et les cibles de Macros d'aujourd'hui. */
+  /**
+   * La moyenne des Objectifs caloriques et cibles de Macros en vigueur les jours avec Entrée
+   * (chaque jour avec les siennes), null sans aucun.
+   */
   cibles: Macros | null;
   /** Les Pesées de la période, de la plus ancienne à la plus récente. */
   pesees: Pesee[];
@@ -86,7 +89,10 @@ export async function statistiques(
     const ligne = historique.findLast((h) => h.depuis <= jour);
     return ligne ? calculerObjectif(versParametres(ligne), jour) : null;
   };
-  const aujourdhui = objectifLe(au);
+  const ciblesLe = (jour: Jour): Macros | null => {
+    const objectif = objectifLe(jour);
+    return objectif ? { kcal: objectif.kcal, ...objectif.macros } : null;
+  };
   const o = profil?.objectif;
 
   return {
@@ -99,7 +105,7 @@ export async function statistiques(
     })),
     joursAvecEntree: totaux.filter((t) => t.total !== null).length,
     moyenne: moyenneMacros(totaux.map((t) => t.total)),
-    cibles: aujourdhui ? { kcal: aujourdhui.kcal, ...aujourdhui.macros } : null,
+    cibles: moyenneMacros(totaux.filter((t) => t.total !== null).map((t) => ciblesLe(t.jour))),
     pesees: pesees.toReversed(),
     poidsCibleKg: o && o.sens !== "maintenir" ? o.poidsCibleKg : null,
   };

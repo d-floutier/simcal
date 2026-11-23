@@ -81,7 +81,7 @@ describe("statistiques", () => {
     ]);
   });
 
-  it("fait la moyenne des Macros sur les seuls jours avec Entrée, comparée aux cibles du jour", async () => {
+  it("fait la moyenne des Macros sur les seuls jours avec Entrée, comparée aux cibles de ces jours", async () => {
     await ajouter("pomme crue", 200, "2026-11-18");
     await ajouter("riz blanc cuit", 100, "2026-11-21");
 
@@ -98,6 +98,22 @@ describe("statistiques", () => {
     expect(stats.cibles?.glucides).toBeCloseTo(276.125, 9);
     expect(stats.cibles?.proteines).toBeCloseTo(110.45, 9);
     expect(stats.cibles?.lipides).toBeCloseTo(73.6333333, 6);
+  });
+
+  it("compare la moyenne à la moyenne des cibles de chaque jour avec Entrée, pas à celles d'aujourd'hui", async () => {
+    // Objectif 2 209 kcal le 18 ; une Pesée à 78 kg le 20 le fait passer à 2 178 kcal ; 76 kg le 23 : 2 147 kcal.
+    await enregistrerPesee(ctx, { jour: "2026-11-20", poidsKg: 78 }, AUJOURDHUI);
+    await enregistrerPesee(ctx, { jour: "2026-11-23", poidsKg: 76 }, AUJOURDHUI);
+    await ajouter("pomme crue", 200, "2026-11-18");
+    await ajouter("riz blanc cuit", 100, "2026-11-21");
+
+    const stats = await statistiques(ctx, { jours: 7 }, AUJOURDHUI);
+
+    // (2 209 + 2 178) / 2, le 23 (sans Entrée) n'entre pas dans la moyenne
+    expect(stats.cibles?.kcal).toBeCloseTo(2193.5, 9);
+    expect(stats.cibles?.glucides).toBeCloseTo(274.1875, 9);
+    expect(stats.cibles?.proteines).toBeCloseTo(109.675, 9);
+    expect(stats.cibles?.lipides).toBeCloseTo(73.1166667, 6);
   });
 
   it("n'a pas de moyenne quand aucun jour n'a d'Entrée", async () => {
