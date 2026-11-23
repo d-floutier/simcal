@@ -80,7 +80,7 @@ export class EntreeIntrouvable extends Error {
 
 type LigneEntree = typeof tableEntree.$inferSelect;
 
-function versEntree(l: LigneEntree): Entree {
+export function versEntree(l: LigneEntree): Entree {
   const pour100g: ValeursNutritionnelles = {
     kcal: l.kcal,
     proteines: l.proteines,
