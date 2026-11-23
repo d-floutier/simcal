@@ -43,3 +43,9 @@ export {
   type ChampPesee,
   type Pesee,
 } from "./pesees";
+export {
+  statistiques,
+  type JourStatistiques,
+  type PeriodeStatistiques,
+  type Statistiques,
+} from "./statistiques";
