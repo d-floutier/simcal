@@ -2,7 +2,7 @@
 
 import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
-import { NUTRIMENTS_FACULTATIFS } from "@/core";
+import { estUniteAliment, NUTRIMENTS_FACULTATIFS, type UniteAliment } from "@/core";
 import { nombreDuFormulaire as nombre } from "@/lib/nombre-saisi";
 import { requireContexte } from "@/lib/profil";
 import {
@@ -30,10 +30,17 @@ function facultatif(formData: FormData, champ: string): number | null {
   return String(formData.get(champ) ?? "").trim() === "" ? null : nombre(formData, champ);
 }
 
+/** Appelée dans le try de l'action : une unité inconnue est refusée comme une saisie invalide. */
+function lireUnite(formData: FormData): UniteAliment {
+  const unite = formData.get("unite") ?? "g";
+  if (!estUniteAliment(unite)) throw new SaisieAlimentInvalide(["unite"]);
+  return unite;
+}
+
 function lireAliment(formData: FormData): SaisieAlimentPersonnalise {
   return {
     nom: String(formData.get("nom") ?? ""),
-    unite: String(formData.get("unite") ?? "g") as "g" | "ml",
+    unite: lireUnite(formData),
     codeBarres: String(formData.get("codeBarres") ?? ""),
     valeurs: {
       kcal: nombre(formData, "kcal"),

@@ -10,13 +10,12 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-import type { Repas } from "@/core";
+import type { Repas, UniteAliment } from "@/core";
 import type { ProduitOff } from "@/sources/open-food-facts";
 import { user } from "./auth-schema";
 
 export type TypeAliment = "generique" | "produit" | "personnalise";
-/** L'unité de référence d'un Aliment : ses valeurs sont pour 100 g ou pour 100 ml. */
-export type UniteAliment = "g" | "ml";
+export type { UniteAliment };
 /** L'unité dans laquelle la quantité d'une Entrée a été saisie. */
 export type UniteQuantite = "g" | "ml" | "portion";
 

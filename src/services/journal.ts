@@ -1,6 +1,8 @@
 import { and, asc, eq } from "drizzle-orm";
 import {
   estJourValide,
+  estRepas,
+  estUniteAliment,
   jourCalendaire,
   quantiteEnGrammes,
   REPAS,
@@ -151,7 +153,7 @@ const nombreValide = (n: unknown, max: number): n is number =>
 function quantiteValide(q: QuantiteSaisie | undefined): q is QuantiteSaisie {
   if (!q) return false;
   if (q.unite === "portion") return estUuid(q.portionId) && nombreValide(q.nombre, 1000);
-  return (q.unite === "g" || q.unite === "ml") && nombreValide(q.valeur, 100_000);
+  return estUniteAliment(q.unite) && nombreValide(q.valeur, 100_000);
 }
 
 /** Les colonnes de la quantité d'une Entrée : la Portion est cherchée parmi celles de l'Aliment. */
@@ -185,8 +187,6 @@ async function colonnesQuantite(
   };
 }
 
-const repasValide = (r: unknown): r is Repas => REPAS.includes(r as Repas);
-
 /** Aujourd'hui pour l'utilisateur, dans le fuseau de son Profil. */
 async function aujourdhui(ctx: Contexte, instant: Date): Promise<Jour> {
   const [p] = await ctx.db.select({ fuseau: profil.fuseau }).from(profil).where(eq(profil.userId, ctx.userId));
@@ -202,7 +202,7 @@ export type SaisieEntree = { jour: Jour; repas: Repas; alimentId: string; quanti
 export async function ajouterEntree(ctx: Contexte, saisie: SaisieEntree, instant: Date = new Date()): Promise<Entree> {
   const invalides: ChampEntree[] = [];
   if (!estJourValide(saisie.jour)) invalides.push("jour");
-  if (!repasValide(saisie.repas)) invalides.push("repas");
+  if (!estRepas(saisie.repas)) invalides.push("repas");
   if (!quantiteValide(saisie.quantite)) invalides.push("quantite");
   const aliment = await lireAliment(ctx, saisie.alimentId);
   if (!aliment) invalides.push("aliment");
@@ -237,7 +237,7 @@ export async function modifierEntree(
   modif: { quantite?: QuantiteSaisie; repas?: Repas },
 ): Promise<Entree> {
   const invalides: ChampEntree[] = [];
-  if (modif.repas !== undefined && !repasValide(modif.repas)) invalides.push("repas");
+  if (modif.repas !== undefined && !estRepas(modif.repas)) invalides.push("repas");
   if (modif.quantite !== undefined && !quantiteValide(modif.quantite)) invalides.push("quantite");
   if (invalides.length > 0) throw new SaisieEntreeInvalide(invalides);
   if (!estUuid(id)) throw new EntreeIntrouvable(id);

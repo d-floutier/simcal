@@ -1,4 +1,4 @@
-import { estJourValide, jourCalendaire, REPAS, type Jour, type Repas } from "@/core";
+import { estJourValide, estRepas, jourCalendaire, type Jour, type Repas } from "@/core";
 
 /** Le jour demandé dans l'URL s'il est valide et pas futur ; aujourd'hui sinon. */
 export function jourDemande(valeur: unknown, fuseau: string): { jour: Jour; aujourdhui: Jour } {
@@ -9,5 +9,5 @@ export function jourDemande(valeur: unknown, fuseau: string): { jour: Jour; aujo
 
 /** Le Repas demandé dans l'URL, ou le petit-déjeuner par défaut. */
 export function repasDemande(valeur: unknown): Repas {
-  return REPAS.includes(valeur as Repas) ? (valeur as Repas) : "petit-dejeuner";
+  return estRepas(valeur) ? valeur : "petit-dejeuner";
 }

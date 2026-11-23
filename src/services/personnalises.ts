@@ -1,5 +1,5 @@
 import { and, asc, eq, inArray } from "drizzle-orm";
-import { NUTRIMENTS_FACULTATIFS, normaliserRecherche, type Macros, type NutrimentsFacultatifs } from "@/core";
+import { estUniteAliment, NUTRIMENTS_FACULTATIFS, normaliserRecherche, type Macros, type NutrimentsFacultatifs } from "@/core";
 import { aliment, portion, type UniteAliment } from "@/db/schema";
 import { estUuid, fichesAliments, type FicheAliment, type Portion } from "./aliments";
 import { SaisieInvalide } from "./saisie-invalide";
@@ -47,7 +47,7 @@ function valider(saisie: SaisieAlimentPersonnalise) {
   const invalides: ChampAlimentPersonnalise[] = [];
   const nom = typeof saisie.nom === "string" ? saisie.nom.trim() : "";
   if (nom === "" || nom.length > MAX_NOM) invalides.push("nom");
-  if (saisie.unite !== "g" && saisie.unite !== "ml") invalides.push("unite");
+  if (!estUniteAliment(saisie.unite)) invalides.push("unite");
   const v = saisie.valeurs ?? ({} as SaisieAlimentPersonnalise["valeurs"]);
   for (const m of MACROS) if (!valeurValide(v[m], maximum(m))) invalides.push(m);
   for (const n of NUTRIMENTS_FACULTATIFS) {
