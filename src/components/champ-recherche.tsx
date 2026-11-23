@@ -8,6 +8,9 @@ import { Label } from "@/components/ui/label";
 import { textes } from "@/ui/textes";
 
 const t = textes.recherche;
+// On attend une pause dans la frappe avant de chercher : moins d'appels à Open Food Facts,
+// dont la limite (10 recherches par minute) est partagée par tous les utilisateurs.
+const DELAI_SAISIE_MS = 400;
 
 /** Le champ de recherche : met à jour `?q=` pendant la saisie, et la page affiche les résultats. */
 export function ChampRecherche({ valeurInitiale }: { valeurInitiale: string }) {
@@ -28,7 +31,7 @@ export function ChampRecherche({ valeurInitiale }: { valeurInitiale: string }) {
       if (texte.trim()) suivants.set("q", texte);
       else suivants.delete("q");
       demarrer(() => router.replace(`${pathname}?${suivants}`, { scroll: false }));
-    }, 250);
+    }, DELAI_SAISIE_MS);
   }
 
   return (

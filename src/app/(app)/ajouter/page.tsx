@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ChampRecherche } from "@/components/champ-recherche";
-import { CreditCiqual } from "@/components/credit-ciqual";
+import { CreditCiqual, CreditOpenFoodFacts } from "@/components/credit-ciqual";
 import { buttonVariants } from "@/components/ui/button";
 import { jourDemande, repasDemande } from "@/lib/jour-demande";
 import { requireProfil } from "@/lib/profil";
@@ -92,6 +92,7 @@ export default async function AjouterPage(props: PageProps<"/ajouter">) {
       )}
 
       <CreditCiqual />
+      <CreditOpenFoodFacts />
     </div>
   );
 }

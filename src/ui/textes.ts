@@ -188,6 +188,10 @@ export const textes = {
     ciqual:
       "Aliments génériques : Table de composition nutritionnelle des aliments Ciqual 2025, Anses (Licence Ouverte 2.0).",
     ciqualUrl: "https://doi.org/10.57745/RDMHWY",
+    openFoodFacts: "Produits : données Open Food Facts (licence ODbL).",
+    openFoodFactsUrl: "https://world.openfoodfacts.org",
+    odbl: "Licence ODbL",
+    odblUrl: "https://opendatacommons.org/licenses/odbl/1-0/",
   },
   configuration: {
     titre: "Bienvenue sur Simcal",

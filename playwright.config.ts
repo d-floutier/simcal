@@ -21,6 +21,8 @@ const E2E_ALLOWED_EMAILS = [
   "recents-mobile-safari@exemple.fr",
   "stats-mobile-chrome@exemple.fr",
   "stats-mobile-safari@exemple.fr",
+  "produits-mobile-chrome@exemple.fr",
+  "produits-mobile-safari@exemple.fr",
 ];
 
 // Runs a production build against a fresh local PGlite folder, migrated with the
@@ -47,6 +49,8 @@ export default defineConfig({
       PGLITE_DIR: "./.pglite-e2e",
       BETTER_AUTH_SECRET: "e2e-secret-e2e-secret-e2e-secret-0000",
       BETTER_AUTH_URL: baseURL,
+      // La fausse source Open Food Facts : aucun appel réseau pendant les parcours.
+      SIMCAL_OPEN_FOOD_FACTS: "faux",
       SIMCAL_ALLOWED_EMAILS: E2E_ALLOWED_EMAILS.join(","),
     },
   },

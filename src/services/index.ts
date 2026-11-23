@@ -27,7 +27,9 @@ export {
 } from "./profil";
 export {
   chercherAliments,
+  garderProduit,
   lireAliment,
+  openFoodFactsParDefaut,
   sourcesParDefaut,
   type AlimentResume,
   type FicheAliment,

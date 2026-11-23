@@ -3,7 +3,10 @@ import type { ValeursNutritionnelles } from "@/core";
 import type { Db } from "@/db/client";
 import { aliment, portion, type TypeAliment, type UniteAliment } from "@/db/schema";
 import { sourceCiqual } from "@/sources/ciqual";
+import { clientOpenFoodFacts, type ClientOpenFoodFacts } from "@/sources/open-food-facts";
+import { fauxOpenFoodFacts } from "@/sources/open-food-facts-faux";
 import { sourcePersonnalises } from "@/sources/personnalises";
+import { codeProduitAGarder, sourceOpenFoodFacts, sourceProduitsGardes } from "@/sources/produits";
 import type { AlimentResume, SourceAliments } from "@/sources/source";
 import type { Contexte } from "./contexte";
 import { lireRecents } from "./recents";
@@ -64,9 +67,50 @@ export async function fichesAliments(db: Db, lignes: LigneAliment[]): Promise<Fi
   }));
 }
 
-/** Les sources, dans l'ordre où leurs résultats sont présentés. */
-export function sourcesParDefaut(ctx: Contexte): SourceAliments[] {
-  return [sourcePersonnalises(ctx.db, ctx.userId), sourceCiqual(ctx.db)];
+/**
+ * Le client Open Food Facts de l'app. SIMCAL_OPEN_FOOD_FACTS=faux le remplace par la fausse
+ * source (tests Vitest et parcours e2e : aucun appel réseau).
+ */
+export function openFoodFactsParDefaut(): ClientOpenFoodFacts {
+  return process.env.SIMCAL_OPEN_FOOD_FACTS === "faux" ? fauxOpenFoodFacts() : clientOpenFoodFacts();
+}
+
+/**
+ * Les sources, dans l'ordre où leurs résultats sont présentés : Aliments personnalisés,
+ * génériques, puis Produits (ceux déjà gardés en base, puis ceux d'Open Food Facts).
+ * C'est aussi l'ordre de priorité pour trouver un Code-barres.
+ */
+export function sourcesParDefaut(
+  ctx: Contexte,
+  { openFoodFacts = openFoodFactsParDefaut() }: { openFoodFacts?: ClientOpenFoodFacts } = {},
+): SourceAliments[] {
+  return [
+    sourcePersonnalises(ctx.db, ctx.userId),
+    sourceCiqual(ctx.db),
+    sourceProduitsGardes(ctx.db),
+    sourceOpenFoodFacts(ctx.db, openFoodFacts),
+  ];
+}
+
+/**
+ * Garde en base le Produit d'un résultat de recherche Open Food Facts pas encore gardé
+ * (identifiant `off-<Code-barres>`), avec ses Portions, pour pouvoir le noter. Renvoie le
+ * Produit gardé (déjà gardé : le même), ou null si l'identifiant est inconnu ou qu'Open Food
+ * Facts ne répond pas.
+ */
+export async function garderProduit(
+  ctx: Contexte,
+  id: string,
+  openFoodFacts: ClientOpenFoodFacts = openFoodFactsParDefaut(),
+): Promise<AlimentResume | null> {
+  const code = codeProduitAGarder(id);
+  if (!code) return null;
+  try {
+    return await sourceOpenFoodFacts(ctx.db, openFoodFacts).trouverParCodeBarres(code);
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
 }
 
 /**

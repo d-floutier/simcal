@@ -39,3 +39,4 @@ export {
 } from "./entree";
 export { normaliserRecherche } from "./recherche";
 export { joursDeLaPeriode, moyenneMacros, totauxParJour } from "./statistiques";
+export { kcalDepuisKj, KJ_PAR_KCAL } from "./energie";

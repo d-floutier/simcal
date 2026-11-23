@@ -3,6 +3,7 @@ import {
   date,
   doublePrecision,
   index,
+  jsonb,
   pgTable,
   text,
   timestamp,
@@ -10,6 +11,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import type { Repas } from "@/core";
+import type { ProduitOff } from "@/sources/open-food-facts";
 import { user } from "./auth-schema";
 
 export type TypeAliment = "generique" | "produit" | "personnalise";
@@ -111,4 +113,20 @@ export const entree = pgTable(
     creeLe: timestamp("cree_le").defaultNow().notNull(),
   },
   (t) => [index("entree_user_jour_idx").on(t.userId, t.jour)],
+);
+
+/**
+ * Le cache des recherches Open Food Facts, partagé par tous les utilisateurs : sur Vercel, toutes
+ * les instances sortent par les mêmes adresses IP et se partagent la limite d'Open Food Facts
+ * (10 recherches par minute). Il est en base, et non en mémoire, pour servir toutes les instances
+ * et survivre à leurs démarrages à froid. `texte` est la recherche normalisée (normaliserRecherche).
+ */
+export const cacheRechercheOff = pgTable(
+  "cache_recherche_off",
+  {
+    texte: text("texte").primaryKey(),
+    produits: jsonb("produits").$type<ProduitOff[]>().notNull(),
+    creeLe: timestamp("cree_le").defaultNow().notNull(),
+  },
+  (t) => [index("cache_recherche_off_cree_le_idx").on(t.creeLe)],
 );
