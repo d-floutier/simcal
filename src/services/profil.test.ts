@@ -123,6 +123,20 @@ describe("Profil et Objectif", () => {
     expect(await objectifDuJour(ctx, "2026-11-23")).toBeNull();
   });
 
+  it("un changement de fuseau vers l'ouest date la modification du jour le plus tardif des deux fuseaux", async () => {
+    // 23 h 30 UTC le 23 : 0 h 30 le 24 à Paris, 18 h 30 le 23 à New York.
+    await enregistrerProfil(ctx, SAISIE, new Date("2026-11-23T23:30:00Z"));
+    const { jour } = await enregistrerProfil(
+      ctx,
+      { ...SAISIE, fuseau: "America/New_York", objectif: { sens: "maintenir" } },
+      new Date("2026-11-23T23:40:00Z"),
+    );
+
+    expect(jour).toBe("2026-11-24");
+    expect((await objectifDuJour(ctx, "2026-11-24"))?.kcal).toBeCloseTo(2759, 9);
+    expect(await objectifDuJour(ctx, "2026-11-23")).toBeNull();
+  });
+
   it("l'âge, donc l'objectif, suit le jour demandé sans nouvel enregistrement", async () => {
     await enregistrerProfil(ctx, SAISIE, midi("2026-11-23"));
 

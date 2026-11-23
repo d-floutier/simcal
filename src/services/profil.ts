@@ -151,9 +151,9 @@ function champsInvalides(s: SaisieProfil, jour: Jour): ChampProfil[] {
 
 /**
  * Enregistre le Profil, l'Objectif et la Répartition, et un nouvel objectif valable à partir
- * d'aujourd'hui (dans le fuseau saisi). Les jours passés gardent le leur. Le poids du Profil est
- * toujours celui de la Pesée la plus récente : à la première configuration, ou quand le poids
- * change, il est noté comme Pesée d'aujourd'hui.
+ * d'aujourd'hui (dans le fuseau saisi, ou dans l'ancien s'il y est déjà le lendemain). Les jours
+ * passés gardent le leur. Le poids du Profil est toujours celui de la Pesée la plus récente : à la
+ * première configuration, ou quand le poids change, il est noté comme Pesée d'aujourd'hui.
  */
 export async function enregistrerProfil(
   ctx: Contexte,
@@ -161,7 +161,12 @@ export async function enregistrerProfil(
   instant: Date = new Date(),
 ): Promise<{ jour: Jour; objectif: ObjectifCalcule }> {
   const { fuseau, ...parametres } = saisie;
-  const jour = fuseauValide(fuseau) ? jourCalendaire(instant, fuseau) : instant.toISOString().slice(0, 10);
+  const jourSaisi = fuseauValide(fuseau) ? jourCalendaire(instant, fuseau) : instant.toISOString().slice(0, 10);
+  // Après un changement de fuseau, le jour le plus tardif des deux : la modification ne doit
+  // jamais être datée avant une ligne d'historique déjà enregistrée pour aujourd'hui.
+  const [actuel] = await ctx.db.select({ fuseau: profil.fuseau }).from(profil).where(eq(profil.userId, ctx.userId));
+  const jourActuel = actuel ? jourCalendaire(instant, actuel.fuseau) : jourSaisi;
+  const jour = jourActuel > jourSaisi ? jourActuel : jourSaisi;
   const invalides = champsInvalides(saisie, jour);
   if (invalides.length > 0) throw new SaisieProfilInvalide(invalides);
   const objectif = calculerObjectif(parametres, jour);
