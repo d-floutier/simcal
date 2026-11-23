@@ -3,6 +3,7 @@ import type { NiveauActivite, Repas, Rythme, SensObjectif, Sexe } from "@/core";
 import type {
   ChampAlimentPersonnalise,
   ChampEntree,
+  ChampHydratation,
   ChampPesee,
   ChampPortion,
   ChampProfil,
@@ -54,6 +55,7 @@ export const textes = {
     reglages: "Réglages",
     pesees: "Pesées",
     mesAliments: "Mes aliments",
+    statistiques: "Stats",
   },
   journal: {
     titre: "Journal",
@@ -84,6 +86,8 @@ export const textes = {
     placeholder: "Ex. : pomme, riz blanc cuit, crème…",
     aucunResultat: "Aucun aliment trouvé.",
     resultats: "Résultats",
+    recents: "Récents",
+    aucunRecent: "Les aliments que vous notez apparaîtront ici.",
     kcalPour100: (kcal: string, unite: "g" | "ml") => `${kcal} pour 100 ${unite}`,
   },
   aliment: {
@@ -291,6 +295,62 @@ export const textes = {
       refuser: "Non, garder mon Objectif",
     },
   },
+  hydratation: {
+    titre: "Hydratation",
+    progression: (bu: string, objectif: string) => `${bu} sur ${objectif}`,
+    atteint: "Objectif d'hydratation atteint",
+    ajouterVerre: (verre: string) => `+ 1 Verre (${verre})`,
+    ajouterVerreLibelle: (verre: string) => `Ajouter un Verre de ${verre}`,
+    retirerVerre: "Retirer un Verre",
+    nonCompte: "Seuls les Verres comptent : les boissons notées dans le Journal n'y entrent pas.",
+    reglages: {
+      titre: "Hydratation",
+      intro: "Un nouvel Objectif d'hydratation s'applique à partir d'aujourd'hui. La taille du Verre vaut pour les prochains Verres.",
+      objectifMl: "Objectif d'hydratation (ml par jour)",
+      verreMl: "Taille du Verre (ml)",
+      // Pas « Enregistrer » : la page des réglages a déjà ce bouton pour le Profil.
+      bouton: "Appliquer à l'hydratation",
+      enCours: "Mise à jour…",
+      enregistre: "Hydratation mise à jour.",
+    },
+    erreurs: {
+      objectifMl: "Indiquez un nombre entier de ml entre 250 et 10 000.",
+      verreMl: "Indiquez un nombre entier de ml entre 10 et 2 000.",
+    } satisfies Record<ChampHydratation, string>,
+  },
+  statistiques: {
+    titre: "Statistiques",
+    periodes: "Période",
+    periode: (jours: number) => `${jours} jours`,
+    intervalle: (du: string, au: string) => `Du ${du} au ${au}`,
+    kcalTitre: "Kcal par jour",
+    kcalIntro: "Un jour sans Entrée reste vide : il ne compte pas comme un jour à 0 kcal.",
+    consomme: "Consommé",
+    objectif: "Objectif calorique",
+    sansEntree: "sans Entrée",
+    sansObjectif: "pas d'objectif",
+    resumeKcal: (avec: number, total: number) => `Kcal consommées sur ${avec} jours avec Entrée, sur ${total} jours.`,
+    infobulleJour: (jour: string, kcal: string, objectif: string) => `${jour} : ${kcal} (objectif ${objectif})`,
+    macrosTitre: "Moyenne des Macros",
+    macrosIntro: (jours: number) =>
+      jours === 0
+        ? "Aucun jour avec Entrée sur la période."
+        : `Moyenne sur ${jours} jour${jours > 1 ? "s" : ""} avec Entrée, comparée à vos cibles d'aujourd'hui.`,
+    moyenne: "Moyenne",
+    cible: "Cible",
+    kcal: "Kcal",
+    glucides: "Glucides",
+    proteines: "Protéines",
+    lipides: "Lipides",
+    poidsTitre: "Poids",
+    pesee: "Pesée",
+    poidsCible: "Poids cible",
+    aucunePesee: "Aucune Pesée sur la période.",
+    resumePoids: (n: number, premier: string, dernier: string) =>
+      `${n} Pesée${n > 1 ? "s" : ""} sur la période, de ${premier} à ${dernier}.`,
+    voirTableau: "Voir les valeurs",
+    jour: "Jour",
+  },
   horsLigne: {
     indicateur: "Hors ligne",
     saisieImpossible:
@@ -316,6 +376,10 @@ export function formaterNombre(n: number, decimales = 0): string {
   return new Intl.NumberFormat("fr-FR", { maximumFractionDigits: decimales }).format(n);
 }
 
+export function formaterLitres(ml: number): string {
+  return `${formaterNombre(ml / 1000, 2)} L`;
+}
+
 export function formaterKg(kg: number): string {
   return `${formaterNombre(kg, 1)} kg`;
 }
@@ -339,9 +403,9 @@ export function formaterQuantite(valeur: number, unite: string): string {
 }
 
 /** La quantité d'une Entrée : « 150 g », ou « 1,5 × 1 bol (450 g) » en Portions. */
-export function formaterQuantiteEntree(q: QuantiteEntree, grammes: number): string {
+export function formaterQuantiteEntree(q: QuantiteEntree): string {
   if (q.unite !== "portion") return formaterQuantite(q.valeur, q.unite);
-  return `${formaterNombre(q.nombre, 2)} × ${q.nom} (${formaterGrammes(grammes)})`;
+  return `${formaterNombre(q.nombre, 2)} × ${q.nom} (${formaterGrammes(q.nombre * q.grammesParPortion)})`;
 }
 
 export function formaterJourCourt(jour: string): string {

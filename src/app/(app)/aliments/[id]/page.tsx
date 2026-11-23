@@ -5,7 +5,7 @@ import { TableauNutriments } from "@/components/tableau-nutriments";
 import { buttonVariants } from "@/components/ui/button";
 import { jourDemande, repasDemande } from "@/lib/jour-demande";
 import { requireProfil } from "@/lib/profil";
-import { lireAliment } from "@/services";
+import { lireAliment, lireRecents } from "@/services";
 import { formaterJourCourt, textes } from "@/ui/textes";
 
 export default async function AlimentPage(props: PageProps<"/aliments/[id]">) {
@@ -15,6 +15,8 @@ export default async function AlimentPage(props: PageProps<"/aliments/[id]">) {
   const { jour } = jourDemande(params.jour, profil.fuseau);
   const repas = repasDemande(params.repas);
   const aliment = await lireAliment(ctx, id);
+  // Un Récent s'ouvre avec la dernière quantité notée pour cet Aliment.
+  const recent = aliment && (await lireRecents(ctx)).find((r) => r.aliment.id === aliment.id);
   const retour = `/ajouter?jour=${jour}&repas=${repas}`;
 
   return (
@@ -58,6 +60,7 @@ export default async function AlimentPage(props: PageProps<"/aliments/[id]">) {
               pour100g={aliment.valeurs}
               uniteParDefaut={aliment.unite}
               portions={aliment.portions}
+              quantite={recent ? recent.quantite : undefined}
             />
           </section>
           {aliment.type === "generique" && <CreditCiqual />}

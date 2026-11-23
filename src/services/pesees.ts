@@ -63,7 +63,13 @@ async function appliquerPoids(tx: Tx, userId: string, jour: Jour, poidsKg: numbe
   // Sans objectif en vigueur ce jour-là, on part du Profil courant.
   const base = enVigueur ?? (await tx.select().from(profil).where(eq(profil.userId, userId)))[0];
   if (!base) return;
-  const ligne = { ...versLigne(versParametres(base)), userId, depuis: jour, poidsKg };
+  const ligne = {
+    ...versLigne(versParametres(base)),
+    objectifHydratationMl: base.objectifHydratationMl,
+    userId,
+    depuis: jour,
+    poidsKg,
+  };
   await tx
     .insert(objectifHistorique)
     .values(ligne)

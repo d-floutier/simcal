@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { ResumeJournal } from "@/components/resume-journal";
+import { SuiviHydratation } from "@/components/hydratation";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { jourDecale } from "@/core";
 import { jourDemande } from "@/lib/jour-demande";
 import { requireProfil } from "@/lib/profil";
-import { lireJournal } from "@/services";
+import { lireHydratation, lireJournal } from "@/services";
 import { formaterJourLong, formaterKcal, formaterQuantiteEntree, textes } from "@/ui/textes";
 
 const t = textes.journal;
@@ -15,7 +16,7 @@ export default async function JournalPage(props: PageProps<"/">) {
   const { ctx, profil } = await requireProfil();
   // Un jour futur ou illisible ramène à aujourd'hui : on ne note pas dans le futur.
   const { jour, aujourdhui } = jourDemande((await props.searchParams).jour, profil.fuseau);
-  const journal = await lireJournal(ctx, jour);
+  const [journal, hydratation] = await Promise.all([lireJournal(ctx, jour), lireHydratation(ctx, jour)]);
   const estAujourdhui = jour === aujourdhui;
 
   return (
@@ -61,6 +62,8 @@ export default async function JournalPage(props: PageProps<"/">) {
 
       <ResumeJournal titre={t.objectifDuJour} total={journal.total} objectif={journal.objectif} reste={journal.reste} />
 
+      <SuiviHydratation key={jour} hydratation={hydratation} />
+
       {journal.repas.map(({ repas, entrees, total }) => (
         <Card key={repas} size="sm" role="region" aria-labelledby={`repas-${repas}`}>
           <CardHeader className="flex flex-row items-center justify-between gap-2">
@@ -85,7 +88,7 @@ export default async function JournalPage(props: PageProps<"/">) {
                       <span className="min-w-0">
                         <span className="block truncate">{e.nom}</span>
                         <span className="text-xs text-muted-foreground">
-                          {formaterQuantiteEntree(e.quantite, e.grammes)}
+                          {formaterQuantiteEntree(e.quantite)}
                         </span>
                       </span>
                       <span className="shrink-0 tabular-nums">{formaterKcal(e.valeurs.kcal)}</span>

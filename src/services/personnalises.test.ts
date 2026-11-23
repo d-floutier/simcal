@@ -13,6 +13,7 @@ import {
   SaisiePortionInvalide,
   supprimerPortion,
   modifierEntree,
+  lireRecents,
   SaisieEntreeInvalide,
   AlimentIntrouvable,
   creerAlimentPersonnalise,
@@ -242,6 +243,13 @@ describe("Entrées en Portions", () => {
     expect(entree.grammes).toBe(450);
     expect(entree.valeurs.kcal).toBeCloseTo(180, 9);
     expect((await lireJournal(ctx, AUJOURDHUI)).total.kcal).toBeCloseTo(180, 9);
+  });
+
+  it("garde la Portion comme dernière quantité du Récent", async () => {
+    await noterEnBols(2);
+
+    const [recent] = await lireRecents(ctx);
+    expect(recent.quantite).toEqual({ unite: "portion", portionId: bol.id, nombre: 2, nom: "1 bol", grammesParPortion: 300 });
   });
 
   it("refuse une Portion d'un autre Aliment, inconnue ou un nombre non positif", async () => {

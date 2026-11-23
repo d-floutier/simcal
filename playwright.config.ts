@@ -15,6 +15,12 @@ const E2E_ALLOWED_EMAILS = [
   "pesees-mobile-safari@exemple.fr",
   "personnalises-mobile-chrome@exemple.fr",
   "personnalises-mobile-safari@exemple.fr",
+  "hydratation-mobile-chrome@exemple.fr",
+  "hydratation-mobile-safari@exemple.fr",
+  "recents-mobile-chrome@exemple.fr",
+  "recents-mobile-safari@exemple.fr",
+  "stats-mobile-chrome@exemple.fr",
+  "stats-mobile-safari@exemple.fr",
 ];
 
 // Runs a production build against a fresh local PGlite folder, migrated with the

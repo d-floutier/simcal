@@ -34,6 +34,7 @@ export {
   type Portion,
   type SourceAliments,
 } from "./aliments";
+export { lireRecents, NOMBRE_RECENTS, type Recent } from "./recents";
 export {
   enregistrerPesee,
   listerPesees,
@@ -62,3 +63,22 @@ export {
   type SaisieAlimentPersonnalise,
   type SaisiePortion,
 } from "./personnalises";
+export {
+  ajouterVerre,
+  BORNES_HYDRATATION,
+  lireHydratation,
+  lireReglagesHydratation,
+  modifierReglagesHydratation,
+  objectifHydratationDuJour,
+  ReglagesHydratationInvalides,
+  retirerVerre,
+  type ChampHydratation,
+  type HydratationDuJour,
+  type ReglagesHydratation,
+} from "./hydratation";
+export {
+  statistiques,
+  type JourStatistiques,
+  type PeriodeStatistiques,
+  type Statistiques,
+} from "./statistiques";

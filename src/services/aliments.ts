@@ -6,6 +6,7 @@ import { sourceCiqual } from "@/sources/ciqual";
 import { sourcePersonnalises } from "@/sources/personnalises";
 import type { AlimentResume, SourceAliments } from "@/sources/source";
 import type { Contexte } from "./contexte";
+import { lireRecents } from "./recents";
 
 export type { AlimentResume, SourceAliments };
 
@@ -69,7 +70,8 @@ export function sourcesParDefaut(ctx: Contexte): SourceAliments[] {
 }
 
 /**
- * Cherche des Aliments dans chaque source, dans l'ordre des sources, sans doublons.
+ * Cherche des Aliments : d'abord les Récents qui correspondent, puis chaque source, dans
+ * l'ordre des sources, sans doublons.
  * Une source en erreur est ignorée : les autres résultats s'affichent quand même.
  */
 export async function chercherAliments(
@@ -86,8 +88,9 @@ export async function chercherAliments(
       }),
     ),
   );
+  const recents = (await lireRecents(ctx, texte)).map((r) => r.aliment);
   const vus = new Set<string>();
-  return parSource.flat().filter((a) => !vus.has(a.id) && vus.add(a.id));
+  return [recents, ...parSource].flat().filter((a) => !vus.has(a.id) && vus.add(a.id));
 }
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
