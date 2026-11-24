@@ -59,9 +59,9 @@ export default async function PeseesPage({ searchParams }: PageProps<"/pesees">)
 
       <FormulairePesee key={aModifier?.jour ?? "nouvelle"} aujourdhui={aujourdhui} pesee={aModifier} />
 
-      <section aria-labelledby="historique-pesees" className="flex flex-col gap-2">
-        <h2 id="historique-pesees" className="text-base font-semibold">
-          {t.historique}
+      <section aria-labelledby="pesees-precedentes" className="flex flex-col gap-2">
+        <h2 id="pesees-precedentes" className="text-base font-semibold">
+          {t.precedentes}
         </h2>
         {pesees.length === 0 ? (
           <p className="text-sm text-muted-foreground">{t.aucune}</p>

@@ -316,7 +316,7 @@ export const textes = {
     enCours: "Enregistrement…",
     annuler: "Annuler",
     enregistree: "Pesée enregistrée.",
-    historique: "Historique",
+    precedentes: "Pesées précédentes",
     aucune: "Aucune Pesée pour l'instant.",
     modifier: "Modifier",
     supprimer: "Supprimer",
