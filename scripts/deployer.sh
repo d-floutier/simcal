@@ -252,6 +252,11 @@ while true; do
   if [[ "$DATABASE_URL" != postgres*://* ]]; then
     warn "ça ne ressemble pas à une chaîne postgresql:// ; recommence."; continue
   fi
+  # La saisie est masquée : un collage répété passe inaperçu et casse le driver Neon.
+  if [[ "${DATABASE_URL#*://}" == *postgres*://* ]]; then
+    warn "la chaîne a été collée plusieurs fois ; colle-la une seule fois."; continue
+  fi
+  note "reçu : ${DATABASE_URL:0:24}… (${#DATABASE_URL} caractères)"
   [[ "$DATABASE_URL" == *-pooler* ]] || warn "l'hôte ne contient pas « -pooler » : vérifie que le pooling est actif."
   break
 done
