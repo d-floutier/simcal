@@ -4,11 +4,17 @@ Simcal est une web app de suivi nutritionnel : l'utilisateur fixe un objectif de
 
 ## Language
 
+### Compte
+
+**Compte** :
+L'accès personnel de l'utilisateur à Simcal (son email et son mot de passe), auquel sont rattachées toutes ses données. Le supprimer efface tout.
+_Avoid_ : profil (le Profil, ce sont les caractéristiques physiques), utilisateur
+
 ### Objectif
 
 **Profil** :
-Les caractéristiques physiques de l'utilisateur (sexe pour le calcul, date de naissance, taille, poids, niveau d'activité) qui servent à estimer ses dépenses.
-_Avoid_ : compte, fiche
+Les caractéristiques physiques de l'utilisateur (sexe pour le calcul, date de naissance, taille, poids, niveau d'activité) qui servent à estimer ses dépenses, ainsi que son fuseau horaire, qui fixe le changement de jour.
+_Avoid_ : compte (c'est le Compte), fiche (c'est la Fiche aliment)
 
 **Objectif** :
 L'intention de poids de l'utilisateur : perdre, maintenir ou prendre du poids. Pour perdre ou prendre, elle comprend aussi un poids cible et un rythme.
@@ -43,6 +49,10 @@ _Avoid_ : ratio, split
 **Aliment** :
 Tout ce qui peut être noté dans le journal, avec ses valeurs nutritionnelles. C'est le terme qui englobe les aliments génériques, les produits et les aliments personnalisés.
 _Avoid_ : nourriture, item
+
+**Fiche aliment** :
+La présentation complète d'un aliment : ses valeurs nutritionnelles pour 100 g ou 100 ml, ses portions et, pour un produit, sa marque et son code-barres.
+_Avoid_ : détail, page produit
 
 **Aliment générique** :
 Un aliment sans marque, issu d'une table nutritionnelle de référence (par exemple « pomme » ou « riz blanc cuit »).
