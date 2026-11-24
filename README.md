@@ -49,14 +49,19 @@ Sans `DATABASE_URL`, la base est un dossier PGlite local (`./.pglite`, ignoré p
 
 Première fois : `pnpm exec playwright install chromium webkit`.
 
-## Déployer sur Vercel (étape manuelle)
+## Déployer sur Vercel
 
-1. Créer une base Neon et récupérer sa chaîne de connexion pooled.
-2. Appliquer les migrations puis importer CIQUAL : `DATABASE_URL=… pnpm db:migrate && DATABASE_URL=… pnpm db:import-ciqual`.
-3. Importer le repo dans Vercel (framework Next.js, `pnpm`), et définir `DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` et `SIMCAL_ALLOWED_EMAILS`.
-4. Pour les déploiements suivants, relancer `pnpm db:migrate` contre Neon avant chaque déploiement qui ajoute une migration (ou définir la commande de build Vercel à `pnpm db:migrate && pnpm build`).
+Lancer `scripts/deployer.sh` depuis le repo, une fois l'app mergée dans `main` (la branche de production de Vercel). Le wizard guide chaque étape dans le navigateur :
 
-Sur Vercel, sans `DATABASE_URL`, l'app refuse d'ouvrir une base (pas de repli sur PGlite).
+1. il crée la base Neon (Frankfurt) et récupère sa chaîne de connexion pooled ;
+2. il applique les migrations et importe CIQUAL dans Neon ;
+3. il génère `BETTER_AUTH_SECRET` et demande `SIMCAL_ALLOWED_EMAILS` ;
+4. il importe le repo dans Vercel, avec la commande de build `pnpm db:migrate && pnpm build` et les variables copiées dans le presse-papiers ;
+5. il limite `DATABASE_URL` à l'environnement Production, règle la région des fonctions sur `fra1` et vérifie `BETTER_AUTH_URL`.
+
+Les valeurs de production sont écrites dans `.env.prod` (ignoré par git, jamais chargé par Next). Relancer le wizard reprend ces valeurs. Les déploiements suivants appliquent les nouvelles migrations pendant le build.
+
+Sur Vercel, sans `DATABASE_URL`, l'app refuse d'ouvrir une base (pas de repli sur PGlite) : les déploiements Preview n'ont donc pas de base.
 
 ## Organisation du code
 
