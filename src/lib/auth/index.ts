@@ -21,7 +21,10 @@ export function getAuth(): Auth {
 }
 
 export async function getSession() {
-  return getAuth().api.getSession({ headers: await headers() });
+  // headers() first: it makes the page dynamic, so `next build` stops prerendering
+  // before getAuth() opens the database.
+  const requestHeaders = await headers();
+  return getAuth().api.getSession({ headers: requestHeaders });
 }
 
 /** The signed-in user, or a redirect to the sign-in page. Call it in every app page and action. */

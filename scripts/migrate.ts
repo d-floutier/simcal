@@ -5,6 +5,11 @@ import { connect } from "../src/db/client";
 
 async function main() {
   const databaseUrl = process.env.DATABASE_URL;
+  if (process.env.VERCEL && !databaseUrl) {
+    // Preview deployments have no database: say so rather than migrate a throwaway PGlite.
+    console.log("No DATABASE_URL on Vercel: migrations skipped.");
+    return;
+  }
   const pgliteDir = process.env.PGLITE_DIR ?? "./.pglite";
   const conn = connect({ databaseUrl, pgliteDir });
   await conn.migrate();
