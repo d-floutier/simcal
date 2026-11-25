@@ -1,8 +1,14 @@
+@AGENTS.md
+
 ## Agent skills
 
 ### Issue tracker
 
 Issues and specs live as GitHub issues in `d-floutier/simcal` (via `gh`); tickets are sub-issues of their spec, with native blocked-by dependencies. See `docs/agents/issue-tracker.md`.
+
+### Déploiement
+
+Build en échec, erreur en production, logs Vercel : voir `docs/agents/deploiement.md`.
 
 ### Triage labels
 

@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - name: shellcheck
+        run: shellcheck scripts/*.sh
+      # Reproduit le build Vercel sans base : il ne doit jamais ouvrir la base au prérendu.
+      - name: Build Vercel sans base
+        env:
+          VERCEL: "1"
+          DATABASE_URL: ""
+        run: pnpm db:migrate && pnpm build
